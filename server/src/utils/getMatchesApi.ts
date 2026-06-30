@@ -1,9 +1,9 @@
 import { api } from "./api";
 import { formatIsoDate } from "./formatDate";
 
-const MATCH_DATE_UPTO = 2 * 24 * 60 * 60 * 1000
+const MATCH_DATE_UPTO = 3 * 24 * 60 * 60 * 1000
 
-export const getMatchesFromApi = async (matchIds: Map<number, { _id: string, status: string }>) => {
+export const getMatchesFromApi = async (matchIds: any) => {
 
     const competition = "WC"
     const dateFrom = formatIsoDate(new Date())
@@ -15,13 +15,20 @@ export const getMatchesFromApi = async (matchIds: Map<number, { _id: string, sta
 
     const matchesNewData = data.matches.filter((match: any) => {
 
-        if (!matchIds.has(match.id)) {
-            return true;
-        }
+        const TERMINAL_STATUSES = [
+            "FINISHED",
+            "POSTPONED",
+            "SUSPENDED",
+            "CANCELLED",
+        ];
 
         const existingMatch = matchIds.get(match.id);
-        if (!existingMatch) return true;
-        return existingMatch.status !== match.status || ["IN_PLAY", "PAUSED", "LIVE"].includes(existingMatch.status);
+
+        if (!existingMatch) {
+            return !TERMINAL_STATUSES.includes(match.status);
+        }
+
+        return existingMatch.status !== match.status || ["IN_PLAY", "PAUSED", "LIVE"].includes(existingMatch.status || "");
     });
 
     return matchesNewData;
