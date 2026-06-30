@@ -7,7 +7,7 @@ class ApiResponse {
 
     constructor(
         message: string,
-        data: any
+        data?: any
     ) {
         this.success = true;
         this.ok = true;

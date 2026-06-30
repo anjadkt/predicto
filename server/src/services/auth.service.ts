@@ -1,12 +1,12 @@
 import { User } from "../models/user.model";
-import { LoginPayload, RegisterPayload } from "../types/auth.types";
+import { JWTPayload, LoginPayload, RegisterPayload } from "../types/auth.types";
 import AppError from "../utils/AppError";
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { env } from "../config/env";
 import { createToken } from "../utils/createToken";
 
-export const registerService = async (payload: RegisterPayload) => {
+export const register = async (payload: RegisterPayload) => {
 
     const { name, number, password } = payload;
 
@@ -35,7 +35,7 @@ export const registerService = async (payload: RegisterPayload) => {
 
 }
 
-export const loginService = async (payload: LoginPayload) => {
+export const login = async (payload: LoginPayload) => {
 
     const { number, password } = payload
 
@@ -60,6 +60,9 @@ export const loginService = async (payload: LoginPayload) => {
         _id: user._id
     }, env.JWT_REFRESH_SECRET, env.REFRESH_TOKEN_EXPIRES_IN);
 
+    user.refreshToken = refreshToken;
+    await user.save();
+
     return {
         user: {
             name: user.name,
@@ -71,5 +74,35 @@ export const loginService = async (payload: LoginPayload) => {
         refreshToken
     }
 
+
+}
+
+export const refresh = async (refreshToken: string) => {
+
+    if (!refreshToken) throw new AppError(403, "Refresh token required");
+
+    const decoded = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET) as JWTPayload;
+    if (!decoded) throw new AppError(403, "Invalid refresh token");
+
+    const user = await User.findById(decoded._id);
+    if (!user || user.refreshToken !== refreshToken) throw new AppError(403, "Invalid refresh token");
+
+    const accessToken = createToken({
+        _id: user._id,
+        number: user.number,
+        role: user.role
+    }, env.JWT_ACCESS_SECRET, env.ACCESS_TOKEN_EXPIRES_IN);
+
+    const newRefreshToken = createToken({
+        _id: user._id
+    }, env.JWT_REFRESH_SECRET, env.REFRESH_TOKEN_EXPIRES_IN);
+
+    user.refreshToken = newRefreshToken;
+    await user.save();
+
+    return {
+        accessToken,
+        refreshToken: newRefreshToken
+    }
 
 }
