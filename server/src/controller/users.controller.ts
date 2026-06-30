@@ -1,0 +1,27 @@
+import type { Request, Response, NextFunction } from "express";
+import * as userService from "../services/users.service";
+import ApiResponse from "../utils/ApiResponse";
+
+export const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const users = await userService.getAll();
+
+        res.status(200).json(new ApiResponse("Users fetched successfully", users));
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const user = await userService.verifyUser(req.params.userId as string);
+
+        res.status(200).json(new ApiResponse("User verified successfully", user));
+
+    } catch (error) {
+        next(error);
+    }
+}

@@ -7,8 +7,9 @@ const userSchema = new Schema({
     isVerified: { type: Boolean, default: false },
     role: { type: String, enum: ["predictor", "creator"], default: "predictor" },
     points: { type: Number, default: 0 },
-    refreshToken: { type: String },
-});
+    refreshToken: { type: String }
+
+}, { timestamps: true });
 
 
 export const User = model("User", userSchema);
