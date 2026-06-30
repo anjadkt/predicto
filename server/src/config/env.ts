@@ -6,7 +6,7 @@ const getEnv = (key: string) => {
   const value = process.env[key]
 
   if (!value) {
-    throw new Error("Env not found");
+    throw new Error(`Env not found ${key}`);
   }
 
   return value
@@ -22,5 +22,8 @@ export const env = {
   JWT_ACCESS_SECRET: getEnv("JWT_ACCESS_SECRET"),
   JWT_REFRESH_SECRET: getEnv("JWT_REFRESH_SECRET"),
   ACCESS_TOKEN_EXPIRES_IN: getEnv("ACCESS_TOKEN_EXPIRES_IN"),
-  REFRESH_TOKEN_EXPIRES_IN: getEnv("REFRESH_TOKEN_EXPIRES_IN")
+  REFRESH_TOKEN_EXPIRES_IN: getEnv("REFRESH_TOKEN_EXPIRES_IN"),
+  FOOTBALL_API_URL: getEnv("FOOTBALL_API_URL"),
+  FOOTBALL_API_SECRET: getEnv("FOOTBALL_API_SECRET"),
+
 }

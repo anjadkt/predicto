@@ -8,7 +8,7 @@ const router = Router();
 router.use(authenticateUser, authorize("creator"));
 
 router.get("/", getAllUsers);
-router.patch("/:userId", verifyUser)
+router.patch("/:userId", verifyUser);
 
 
 export default router;
