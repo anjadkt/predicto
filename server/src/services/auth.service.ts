@@ -106,3 +106,22 @@ export const refresh = async (refreshToken: string) => {
     }
 
 }
+
+export const logout = async function (userId: string) {
+
+    const user = await User.findById(userId);
+    if (!user) throw new AppError(404, "User not found");
+
+    user.refreshToken = "";
+    await user.save();
+
+    return;
+}
+
+export const getMe = async (userId: string) => {
+
+    const user = await User.findById(userId).select("-password -refreshToken");
+    if (!user) throw new AppError(404, "User not found");
+
+    return user;
+}
