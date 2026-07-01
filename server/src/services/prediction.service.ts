@@ -37,7 +37,8 @@ export const create = async (payload: PredictionPayload) => {
         }
     }, {
         $set: {
-            isUsed: true
+            isUsed: true,
+            predictionId: prediction._id
         }
     })
 
@@ -49,31 +50,40 @@ export const getAll = async (limit: number = 10) => {
 
     const predictions = await Prediction.aggregate([
         {
-            $sort: {
-                closesAt: -1
-            }
+            $facet: {
+                live: [
+                    {
+                        $match: {
+                            status: "LIVE",
+                        },
+                    },
+                    {
+                        $sort: {
+                            closesAt: -1,
+                        },
+                    },
+                ],
+
+                completed: [
+                    {
+                        $match: {
+                            status: "COMPLETED",
+                        },
+                    },
+                    {
+                        $sort: {
+                            closesAt: -1,
+                        },
+                    },
+                    {
+                        $limit: limit,
+                    },
+                ],
+            },
         },
-        {
-            $limit: limit
-        },
-        {
-            $group: {
-                _id: "$status",
-                predictions: {
-                    $push: "$$ROOT",
-                }
-            }
-        },
-        {
-            $project: {
-                _id: 0,
-                status: "$_id",
-                predictions: 1
-            }
-        }
     ]);
 
-    return predictions;
+    return predictions[0];
 
 }
 
@@ -172,13 +182,50 @@ export const update = async (predictorId: string, predictionId: string, predicti
 
 }
 
+
+//not completed
+
 export const results = async (predictionId: string) => {
 
-    const prediction = await Prediction
-        .findById(predictionId)
-        .select("-_v ")
+    const prediction = await Prediction.findById(predictionId).lean();
+    if (!prediction) throw new AppError(404, "Prediction not found!");
+
+    const matches = await Match
+        .find({
+            _id: {
+                $in: prediction.matches.map(v => v.matchId)
+            },
+            status: "FINISHED"
+        });
+
+    if (matches.length !== prediction.matches.length) {
+        throw new AppError(400, "Some matches are not finished yet!");
+    }
+
+
+
+
+
+
+
+}
+
+export const matchPredictions = async (matchId: string) => {
+
+    const match = await Match.findById(matchId).select("-__v -createdAt -updatedAt").lean();
+    if (!match) throw new AppError(404, "Match not found!");
+
+    const userPrediction = await UserPrediction
+        .find({
+            predictionId: match.predictionId
+        })
+        .select("-_v -updatedAt")
+        .populate("predictorId", "name number ")
+        .sort({ createdAt: 1 })
         .lean();
 
-
-
+    return {
+        match,
+        predictions: userPrediction
+    }
 }

@@ -1,4 +1,4 @@
-import { model, Schema } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
 
 export const teamSchema = new Schema({
@@ -122,6 +122,10 @@ const matchSchema = new Schema({
     isUsed: {
         type: Boolean,
         default: false
+    },
+    predictionId: {
+        type: Types.ObjectId,
+        ref: "Prediction"
     }
 }, {
     timestamps: true

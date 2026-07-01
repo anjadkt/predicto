@@ -65,13 +65,29 @@ export const updatePrediction = async (req: Request, res: Response, next: NextFu
     }
 }
 
+// not completed
+
+export const getMatchPredictions = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const matchId = req.params.matchId as string;
+
+        const predictions = await predictionService.matchPredictions(matchId);
+
+        res.status(200).json(
+            new ApiResponse("Match predictions fetched successfully!", predictions)
+        );
+    } catch (error) {
+        next(error);
+    }
+}
+
 export const getPredictionResults = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        // const prediction = await predictionService.results(req.params.id as string);
+        const prediction = await predictionService.results(req.params.id as string);
 
-        // res.status(200).json(
-        //     new ApiResponse("Prediction fetched successfully!", prediction)
-        // )
+        res.status(200).json(
+            new ApiResponse("Prediction fetched successfully!", prediction)
+        )
     } catch (error) {
         next(error);
     }
