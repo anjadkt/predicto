@@ -19,7 +19,7 @@ const predictSchema = new Schema({
             default: null
         }
     }
-}, { _id: true })
+})
 
 const userPredictionSchema = new Schema({
     predictionId: {

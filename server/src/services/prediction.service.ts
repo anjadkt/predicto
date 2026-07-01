@@ -21,8 +21,6 @@ export const create = async (payload: PredictionPayload) => {
         throw new AppError(400, "Some matches are already used for prediction")
     }
 
-    console.log(matches);
-
     const matchDate = new Date(matches[0].utcDate);
     const closesAt = new Date(payload.closesAt);
 
@@ -81,6 +79,13 @@ export const getAll = async (limit: number = 10) => {
 
 export const predict = async (predictorId: string, predictionId: string, predictions: PredictedPayload) => {
 
+    const isPredictionExist = await Prediction.findById(predictionId).lean();
+    if (!isPredictionExist) throw new AppError(404, "Prediction not found!");
+
+    if (new Date() > isPredictionExist.closesAt) {
+        throw new AppError(400, "Prediction has been closed.");
+    }
+
     const isValid = predictions.every((prediction) => {
         const scores = prediction.predictedScores;
         return (
@@ -91,7 +96,7 @@ export const predict = async (predictorId: string, predictionId: string, predict
     if (!isValid) throw new AppError(400, "Invalid prediction data!");
 
     const user = await User.findById(predictorId).select("isVerified").lean();
-    if (!user || !user?.isVerified) throw new AppError(404, "User not found!");
+    if (!user?.isVerified) throw new AppError(404, "User not found!");
 
     const isPredicted = await UserPrediction.findOne({
         predictionId,
@@ -106,8 +111,6 @@ export const predict = async (predictorId: string, predictionId: string, predict
                 $in: ["SCHEDULED", "TIMED"]
             }
         })
-        .sort({ utcDate: 1 })
-        .lean();
     if (matches.length !== predictions.length) throw new AppError(400, "Some matches are not found!");
 
     const userPrediction = await UserPrediction.create({
@@ -117,6 +120,56 @@ export const predict = async (predictorId: string, predictionId: string, predict
     });
 
     return userPrediction;
+}
+
+export const update = async (predictorId: string, predictionId: string, predictions: PredictedPayload) => {
+
+    const isPredictionExist = await Prediction.findById(predictionId).lean();
+    if (!isPredictionExist) throw new AppError(404, "Prediction not found!");
+
+    if (new Date() > isPredictionExist.closesAt) {
+        throw new AppError(400, "Prediction has been closed.");
+    }
+
+    const user = await User.findById(predictorId).select("isVerified").lean();
+    if (!user?.isVerified) throw new AppError(404, "User not found!");
+
+    const isValid = predictions.every((prediction) => {
+        const scores = prediction.predictedScores;
+        return (
+            scores.homeTeam >= 0 &&
+            scores.awayTeam >= 0
+        )
+    });
+    if (!isValid) throw new AppError(400, "Invalid prediction data!");
+
+    const matches = await Match
+        .find({
+            _id: { $in: predictions.map(v => v.matchId) },
+            status: {
+                $in: ["SCHEDULED", "TIMED"]
+            }
+        })
+    if (matches.length !== predictions.length) throw new AppError(400, "Some matches are not found!");
+
+    const userPrediction = await UserPrediction.findOneAndUpdate(
+        {
+            predictionId,
+            predictorId,
+        },
+        {
+            $set: {
+                predictions
+            }
+        },
+        {
+            new: true
+        }
+    ).select("-_v -createdAt -updatedAt");
+    if (!userPrediction) throw new AppError(404, "Failed to update prediction!");
+
+    return userPrediction;
+
 }
 
 export const results = async (predictionId: string) => {

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticateUser } from "../middlewares/auth.middleware";
-import { createPrediction, getAllPrediction, getPredictionResults, userPrediction } from "../controller/prediction.controller";
+import { createPrediction, getAllPrediction, getPredictionResults, updatePrediction, userPrediction } from "../controller/prediction.controller";
 import { authorize } from "../middlewares/role.middleware";
 
 const router = Router();
@@ -8,6 +8,7 @@ const router = Router();
 router.post("/", authenticateUser, authorize("creator"), createPrediction);
 router.get("/", authenticateUser, getAllPrediction);
 router.post("/:id/predict", authenticateUser, userPrediction);
+router.patch("/:id/predict", authenticateUser, updatePrediction);
 
 router.get("/:id/results", authenticateUser, authorize("creator"), getPredictionResults);
 

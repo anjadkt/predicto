@@ -38,10 +38,30 @@ export const userPrediction = async (req: Request, res: Response, next: NextFunc
         )
 
         res.status(201).json(
-            new ApiResponse("Prediction updated successfully", userPrediction)
+            new ApiResponse("Prediction made successfully!", userPrediction)
         );
     } catch (error) {
         next(error);
+    }
+}
+
+export const updatePrediction = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?._id || ""
+        const predictionId = req.params.id as string;
+        const predictions = req.body.predictions as PredictedPayload
+
+        const userPrediction = await predictionService.update(
+            userId,
+            predictionId,
+            predictions
+        );
+
+        res.status(200).json(
+            new ApiResponse("User's Prediction updated!", userPrediction)
+        );
+    } catch (error) {
+        next(error)
     }
 }
 
