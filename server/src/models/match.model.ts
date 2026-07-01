@@ -1,7 +1,7 @@
 import { model, Schema } from "mongoose";
 
 
-const teamSchema = new Schema({
+export const teamSchema = new Schema({
     id: Number,
     name: {
         type: String,
@@ -119,6 +119,12 @@ const matchSchema = new Schema({
             "LIVE"
         ],
     },
+    isUsed: {
+        type: Boolean,
+        default: false
+    }
+}, {
+    timestamps: true
 });
 
 

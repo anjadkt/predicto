@@ -68,7 +68,8 @@ export const matches = async (limit: number) => {
     const matches = await Match.aggregate([
         {
             $match: {
-                status: { $in: ["IN_PLAY", "PAUSED", "FINISHED"] }
+                status: { $in: ["IN_PLAY", "PAUSED", "FINISHED"] },
+                isUsed: false
             }
         },
         {
@@ -102,7 +103,7 @@ export const matches = async (limit: number) => {
             },
         },
         {
-            $limit: query.limit,
+            $limit: limit,
         },
     ]);
     return matches;

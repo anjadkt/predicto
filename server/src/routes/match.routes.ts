@@ -6,6 +6,6 @@ import { getMatchesController, newMatchsController } from "../controller/match.c
 const router = Router();
 
 router.get("/new", authenticateUser, authorize("creator"), newMatchsController);
-router.get("/", getMatchesController);
+router.get("/", authenticateUser, getMatchesController);
 
 export default router;
