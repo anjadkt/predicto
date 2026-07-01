@@ -51,6 +51,59 @@ export const sync = async () => {
     }
 }
 
-export const createMatch = async (matches: MatchData, matchId: string) => {
+export const newMatches = async () => {
 
+    const matches = await Match
+        .find({ status: { $in: ["SCHEDULED", "TIMED"] } })
+        .select("-__v  -score")
+        .sort({ utcDate: 1 })
+        .lean();
+
+    return matches;
+
+}
+
+export const matches = async (limit: number) => {
+
+    const matches = await Match.aggregate([
+        {
+            $match: {
+                status: { $in: ["IN_PLAY", "PAUSED", "FINISHED"] }
+            }
+        },
+        {
+            $addFields: {
+                statusPriority: {
+                    $switch: {
+                        branches: [
+                            {
+                                case: {
+                                    $in: ["$status", ["LIVE", "IN_PLAY", "PAUSED"]]
+                                },
+                                then: 1
+                            },
+                            { case: { $eq: ["$status", "FINISHED"] }, then: 2 }
+                        ],
+                        default: 99,
+                    },
+                },
+            },
+        },
+        {
+            $sort: {
+                statusPriority: 1,
+                utcDate: -1,
+            },
+        },
+        {
+            $project: {
+                __v: 0,
+                statusPriority: 0,
+            },
+        },
+        {
+            $limit: query.limit,
+        },
+    ]);
+    return matches;
 }

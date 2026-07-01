@@ -16,28 +16,25 @@ export const syncMatches = async () => {
 
 export const newMatchsController = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        // const matches = await matchService.getMatches(req.query as MatchQuery);
+        const matches = await matchService.newMatches();
 
-        // res.status(200).json(
-        //     new ApiResponse("Matches fetched successfully", matches)
-        // );
+        res.status(200).json(
+            new ApiResponse("Matches fetched successfully", matches)
+        );
 
     } catch (error) {
         next(error);
     }
 }
 
-export const createMatchController = async (req: Request, res: Response, next: NextFunction) => {
+export const getMatchesController = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        // const { matchId } = req.params;
+        const matches = await matchService.matches(Number(req.query.limit || 10));
 
-        // const matches = await matchService.getMatches(req.query as MatchQuery);
+        res.status(200).json(
+            new ApiResponse("Matches fetched successfully", matches)
+        );
 
-        // const match = await matchService.createMatch(matches, matchId as string);
-
-        // res.status(200).json(
-        //     new ApiResponse("Match created successfully", match)
-        // );
     } catch (error) {
         next(error);
     }

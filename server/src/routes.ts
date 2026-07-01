@@ -8,7 +8,7 @@ const router = Router();
 
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
-router.use("/predictions", preductionRoutes);
 router.use("/matchs", matchRoutes);
+router.use("/predictions", preductionRoutes);
 
 export default router;

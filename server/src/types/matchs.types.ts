@@ -1,7 +1,6 @@
 type MatchStatus = "SCHEDULED" | "TIMED" | "IN_PLAY" | "PAUSED" | "FINISHED" | "POSTPONED" | "SUSPENDED" | "CANCELLED" | "LIVE"
 
 export type MatchQuery = {
-    competition: string;
     dateFrom: string;
     dateTo: string;
     status: MatchStatus

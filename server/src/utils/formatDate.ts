@@ -11,7 +11,7 @@ export const formatDate = (date: string) => {
 
 export const formatTime = (date: string) => {
     const istDate = utcToIst(date);
-    return istDate.split(",")[1].trim();
+    return istDate.split(",")[1].trim().replace(/:\d{2}(?=\s*(AM|PM))/i, "").toUpperCase();
 }
 
 export const formatIsoDate = (date: Date) => {
