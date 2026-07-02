@@ -8,15 +8,34 @@ import mongoose from "mongoose";
 
 export const create = async (payload: PredictionPayload) => {
 
-    const matches = await Match
-        .find({
-            _id: {
-                $in: payload.matches.map((match) => match.matchId)
-            },
-            isUsed: false
-        })
-        .select("-__v -createdAt -updatedAt -isUsed -score -istDate -status")
-        .sort({ utcDate: 1 })
+
+    const matches = await Match.aggregate([
+        {
+            $match: {
+                _id: {
+                    $in: payload.matches.map(match => new mongoose.Types.ObjectId(match.matchId))
+                },
+                isUsed: false
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                matchId: "$_id",
+                apiMatchId: 1,
+                awayTeam: 1,
+                homeTeam: 1,
+                date: 1,
+                time: 1,
+                utcDate: 1
+            }
+        },
+        {
+            $sort: {
+                utcDate: 1
+            }
+        }
+    ]);
 
     if (matches.length !== payload.matches.length) {
         throw new AppError(400, "Some matches are already used for prediction")
@@ -25,7 +44,7 @@ export const create = async (payload: PredictionPayload) => {
     const matchDate = new Date(matches[0].utcDate);
     const closesAt = new Date(payload.closesAt);
 
-    const date = matchDate < closesAt ? closesAt : matchDate;
+    const date = closesAt > matchDate ? matchDate : closesAt;
 
     const prediction = await Prediction.create({
         matches,
