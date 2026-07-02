@@ -70,6 +70,7 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
 
         session.startTransaction();
 
+        let isAllFinished = false;
 
         if (type === "FINISHED") {
 
@@ -82,7 +83,7 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
                 throw new AppError(404, "Prediction not found!");
             }
 
-            const isAllFinished = prediction.matches.every(
+            isAllFinished = prediction.matches.every(
                 (v: any) => v.matchId.status === "FINISHED"
             );
 
@@ -126,6 +127,12 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
                 };
             }
 
+            const totalPoints =
+                isAllFinished ?
+                    p.predictions.reduce((accum, v) => {
+                        return accum + (v.results?.points || 0);
+                    }, 0) + (result?.points || 0) : 0;
+
             predictionUpdates.push({
                 updateOne: {
                     filter: {
@@ -134,7 +141,8 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
                     },
                     update: {
                         $set: {
-                            "predictions.$.results": result
+                            "predictions.$.results": result,
+                            totalPoints
                         },
                     },
                 },
