@@ -16,7 +16,10 @@ export const createPrediction = async (req: Request, res: Response, next: NextFu
 
 export const getAllPrediction = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const predictions = await predictionService.getAll(Number(req.query.limit as string));
+        const predictions = await predictionService.getAll(
+            Number(req.query.limit as string),
+            req.user?._id || ""
+        );
         res.status(200).json(
             new ApiResponse("Prediction fetched successfully!", predictions)
         )

@@ -46,7 +46,7 @@ export const create = async (payload: PredictionPayload) => {
 
 }
 
-export const getAll = async (limit: number = 10) => {
+export const getAll = async (limit: number = 10, predictorId: string) => {
 
     const predictions = await Prediction.aggregate([
         {
@@ -83,7 +83,13 @@ export const getAll = async (limit: number = 10) => {
         },
     ]);
 
-    return predictions[0];
+    const userPredictions = await UserPrediction
+        .find({ predictorId })
+        .populate("predictions.matchId", "awayTeam homeTeam score")
+        .select("-_v -updatedAt")
+        .lean()
+
+    return { predictions, userPredictions };
 
 }
 
