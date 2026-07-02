@@ -5,13 +5,15 @@ import { authorize } from "../middlewares/role.middleware";
 
 const router = Router();
 
-router.get("/", authenticateUser, getAllPrediction);
-router.post("/", authenticateUser, authorize("creator"), createPrediction);
-router.post("/:id/predict", authenticateUser, userPrediction);
-router.patch("/:id/predict", authenticateUser, updatePrediction);
-router.get("/:matchId", authenticateUser, getMatchPredictions);
+router.use(authenticateUser)
+
+router.get("/", getAllPrediction);
+router.post("/", authorize("creator"), createPrediction);
+router.post("/:id/predict", userPrediction);
+router.patch("/:id/predict", updatePrediction);
+router.get("/:matchId", getMatchPredictions);
 
 // not completed
-router.get("/:id/results", authenticateUser, authorize("creator"), getPredictionResults);
+router.get("/:id/results", authorize("creator"), getPredictionResults);
 
 export default router;

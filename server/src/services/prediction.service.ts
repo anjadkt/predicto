@@ -87,6 +87,7 @@ export const getAll = async (limit: number = 10, predictorId: string) => {
         .find({ predictorId })
         .populate("predictions.matchId", "awayTeam homeTeam score")
         .select("-_v -updatedAt")
+        .limit(limit)
         .lean()
 
     return { predictions, userPredictions };
