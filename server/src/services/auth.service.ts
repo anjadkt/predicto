@@ -8,7 +8,7 @@ import { createToken } from "../utils/createToken";
 
 export const register = async (payload: RegisterPayload) => {
 
-    const { name, number, password } = payload;
+    const { name, number, password, avatar } = payload;
 
     if (!name || !password || !number) throw new AppError(400, "All fields are required");
 
@@ -22,14 +22,16 @@ export const register = async (payload: RegisterPayload) => {
     const user = await User.create({
         name,
         number,
-        password: hashedPass
+        password: hashedPass,
+        avatar
     })
 
     return {
         name: user.name,
         number: user.number,
         role: user.role,
-        isVerified: user.isVerified
+        isVerified: user.isVerified,
+        avatar: user.avatar
     };
 
 
@@ -68,7 +70,8 @@ export const login = async (payload: LoginPayload) => {
             name: user.name,
             number: user.number,
             role: user.role,
-            isVerified: user.isVerified
+            isVerified: user.isVerified,
+            avatar: user.avatar
         },
         accessToken,
         refreshToken

@@ -5,7 +5,6 @@ import AppError from "../utils/AppError";
 import mongoose from "mongoose";
 import { UserPrediction } from "../models/userPrediction.model";
 import { calculatePoints } from "../utils/calcPoints";
-import { User } from "../models/user.model";
 import { calculateChance } from "../utils/calcChance";
 import { Prediction } from "../models/prediction.model";
 
@@ -63,28 +62,26 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
 
     try {
 
-        const isMatchExist = await Match.findById(match.matchId).select("predictionId");
+        session.startTransaction();
+
+        const isMatchExist = await Match.findById(match.matchId);
         if (!isMatchExist) {
             throw new AppError(404, "Match not found");
         }
-
-        session.startTransaction();
-
-        let isAllFinished = false;
 
         if (type === "FINISHED") {
 
             const prediction = await Prediction
                 .findById(isMatchExist.predictionId)
-                .populate("matches.matchId", "status")
+                .populate("matches.matchId", "_id status")
                 .select("matches")
                 .session(session);
             if (!prediction) {
                 throw new AppError(404, "Prediction not found!");
             }
 
-            isAllFinished = prediction.matches.every(
-                (v: any) => v.matchId.status === "FINISHED"
+            const isAllFinished = prediction.matches.every(
+                (v: any) => v.matchId._id.toString() === match.matchId.toString() ? true : v.matchId.status === "FINISHED"
             );
 
             if (isAllFinished) {
@@ -96,7 +93,7 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
 
         const userPredictions = await UserPrediction.find({
             predictionId: isMatchExist.predictionId
-        }).session(session);
+        });
 
         const predictionUpdates = [];
 
@@ -127,11 +124,12 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
                 };
             }
 
-            const totalPoints =
-                isAllFinished ?
-                    p.predictions.reduce((accum, v) => {
-                        return accum + (v.results?.points || 0);
-                    }, 0) + (result?.points || 0) : 0;
+            const totalPoints = p.predictions.reduce((accum, v) => {
+                if (v.matchId.toString() === match.matchId.toString()) {
+                    return accum + (result?.points || 0);
+                }
+                return accum + (v.results?.points || 0);
+            }, 0);
 
             predictionUpdates.push({
                 updateOne: {
@@ -165,8 +163,8 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
 export const newMatches = async () => {
 
     const matches = await Match
-        .find({ status: { $in: ["SCHEDULED", "TIMED"] } })
-        .select("-__v  -score")
+        .find({ status: { $in: ["SCHEDULED", "TIMED"] }, isUsed: false })
+        .select("-__v  -score -createdAt -isUsed -updatedAt -istDate")
         .sort({ utcDate: 1 })
         .lean();
 
@@ -211,6 +209,10 @@ export const matches = async (limit: number) => {
             $project: {
                 __v: 0,
                 statusPriority: 0,
+                isUsed: 0,
+                createdAt: 0,
+                updatedAt: 0,
+                istDate: 0,
             },
         },
         {

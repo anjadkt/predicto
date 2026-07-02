@@ -1,6 +1,6 @@
 export type PredictionPayload = {
     matches: {
-        _id: string,
+        matchId: string,
         apiMatchId: string
     }[],
     closesAt: string

@@ -31,6 +31,11 @@ const preductionSchema = new Schema({
         type: String,
         enum: ["LIVE", "COMPLETED"],
         default: "LIVE"
+    },
+
+    isEvaluated: {
+        type: Boolean,
+        default: false
     }
 
 }, { timestamps: true });

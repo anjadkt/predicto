@@ -31,3 +31,19 @@ export const updateScore = async (req: Request, res: Response, next: NextFunctio
         next(error);
     }
 }
+
+export const updateLeaderboard = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const predictionId = req.params.id as string;
+
+        const leaderboard = await leaderboardService.updateLeaderboard(predictionId);
+
+        res.status(200).json(
+            new ApiResponse("Leaderboard updated successfully!", leaderboard)
+        );
+
+    } catch (error) {
+        next(error);
+    }
+}

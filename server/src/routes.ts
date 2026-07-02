@@ -9,8 +9,8 @@ const router = Router();
 
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
-router.use("/matchs", matchRoutes);
+router.use("/matches", matchRoutes);
 router.use("/predictions", preductionRoutes);
-router.use("/leaderboard", leaderboardRoutes)
+router.use("/leaderboard", leaderboardRoutes);
 
 export default router;

@@ -4,13 +4,14 @@ import AppError from "../utils/AppError";
 import { Prediction } from "../models/prediction.model";
 import { User } from "../models/user.model";
 import { UserPrediction } from "../models/userPrediction.model";
+import mongoose from "mongoose";
 
 export const create = async (payload: PredictionPayload) => {
 
     const matches = await Match
         .find({
             _id: {
-                $in: payload.matches.map((match) => match._id)
+                $in: payload.matches.map((match) => match.matchId)
             },
             isUsed: false
         })
@@ -33,7 +34,7 @@ export const create = async (payload: PredictionPayload) => {
 
     await Match.updateMany({
         _id: {
-            $in: payload.matches.map((match) => match._id)
+            $in: payload.matches.map((match) => match.matchId)
         }
     }, {
         $set: {
@@ -42,11 +43,17 @@ export const create = async (payload: PredictionPayload) => {
         }
     })
 
-    return prediction
+    return {
+        matches: prediction.matches,
+        closesAt: prediction.closesAt,
+        _id: prediction._id,
+        status: prediction.status,
+        createdAt: prediction.createdAt
+    }
 
 }
 
-export const getAll = async (limit: number = 10, predictorId: string, creator: string) => {
+export const getAll = async (limit = 10, predictorId: string, role: string) => {
 
     const predictions = await Prediction.aggregate([
         {
@@ -62,6 +69,13 @@ export const getAll = async (limit: number = 10, predictorId: string, creator: s
                             closesAt: -1,
                         },
                     },
+                    {
+                        $project: {
+                            __v: 0,
+                            isEvaluated: 0,
+                            updatedAt: 0
+                        }
+                    }
                 ],
 
                 completed: [
@@ -78,6 +92,13 @@ export const getAll = async (limit: number = 10, predictorId: string, creator: s
                     {
                         $limit: limit,
                     },
+                    {
+                        $project: {
+                            __v: 0,
+                            isEvaluated: 0,
+                            updatedAt: 0
+                        }
+                    }
                 ],
             },
         },
@@ -85,7 +106,7 @@ export const getAll = async (limit: number = 10, predictorId: string, creator: s
 
     let userPredictions: any = [];
 
-    if (creator === "false") {
+    if (role !== "creator") {
         userPredictions = await UserPrediction
             .find({ predictorId })
             .populate("predictions.matchId", "awayTeam homeTeam score")
@@ -94,7 +115,10 @@ export const getAll = async (limit: number = 10, predictorId: string, creator: s
             .lean();
     }
 
-    return { predictions, userPredictions };
+    return {
+        predictions: predictions[0] || { live: [], completed: [] },
+        userPredictions
+    };
 
 }
 
@@ -102,6 +126,12 @@ export const predict = async (predictorId: string, predictionId: string, predict
 
     const isPredictionExist = await Prediction.findById(predictionId).lean();
     if (!isPredictionExist) throw new AppError(404, "Prediction not found!");
+
+    const isPredicted = await UserPrediction.findOne({
+        predictionId,
+        predictorId
+    }).lean();
+    if (isPredicted) throw new AppError(409, "User already predicted this prediction!");
 
     if (new Date() > isPredictionExist.closesAt) {
         throw new AppError(400, "Prediction has been closed.");
@@ -119,12 +149,6 @@ export const predict = async (predictorId: string, predictionId: string, predict
     const user = await User.findById(predictorId).select("isVerified").lean();
     if (!user?.isVerified) throw new AppError(404, "User not found!");
 
-    const isPredicted = await UserPrediction.findOne({
-        predictionId,
-        predictorId
-    }).lean();
-    if (isPredicted) throw new AppError(409, "User already predicted this prediction!");
-
     const matches = await Match
         .find({
             _id: { $in: predictions.map(v => v.matchId) },
@@ -140,7 +164,12 @@ export const predict = async (predictorId: string, predictionId: string, predict
         predictions
     });
 
-    return userPrediction;
+    return {
+        _id: userPrediction._id,
+        predictions: userPrediction.predictions,
+        predictionId: userPrediction.predictionId,
+        predictorId: userPrediction.predictorId
+    };
 }
 
 export const update = async (predictorId: string, predictionId: string, predictions: PredictedPayload) => {
@@ -171,7 +200,7 @@ export const update = async (predictorId: string, predictionId: string, predicti
                 $in: ["SCHEDULED", "TIMED"]
             }
         })
-    if (matches.length !== predictions.length) throw new AppError(400, "Some matches are not found!");
+    if (matches.length !== predictions.length) throw new AppError(404, "Some matches are not found!");
 
     const userPrediction = await UserPrediction.findOneAndUpdate(
         {
@@ -237,30 +266,73 @@ export const matchPredictions = async (matchId: string) => {
     return userPredictions;
 }
 
-
-//not completed
-
 export const results = async (predictionId: string) => {
 
     const prediction = await Prediction.findById(predictionId).lean();
     if (!prediction) throw new AppError(404, "Prediction not found!");
 
-    const matches = await Match
-        .find({
-            _id: {
-                $in: prediction.matches.map(v => v.matchId)
-            },
-            status: "FINISHED"
-        });
+    const userPredictions = await UserPrediction.aggregate([
+        {
+            $match: {
+                predictionId: new mongoose.Types.ObjectId(predictionId)
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "predictorId",
+                foreignField: "_id",
+                as: "predictor"
+            }
+        },
+        {
+            $unwind: "$predictor"
+        },
+        {
+            $group: {
+                _id: "$totalPoints",
+                count: { $sum: 1 },
+                predictors: {
+                    $push: {
+                        _id: "$predictor._id",
+                        name: "$predictor.name",
+                        avatar: "$predictor.avatar",
+                        number: "$predictor.number",
+                        predictions: "$predictions"
+                    }
+                }
+            }
+        },
+        {
+            $sort: {
+                _id: -1
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                points: "$_id",
+                count: 1,
+                predictors: 1
+            }
+        }
+    ]);
 
-    if (matches.length !== prediction.matches.length) {
-        throw new AppError(400, "Some matches are not finished yet!");
-    }
+    return userPredictions;
+}
 
+export const userPrediction = async (predictorId: string, predictionId: string) => {
 
+    const userPrediction = await UserPrediction
+        .findOne({
+            predictorId,
+            predictionId
+        })
+        .populate("predictions.matchId", "awayTeam homeTeam time")
+        .select("totalPoints predictions")
+        .lean();
 
+    if (!userPrediction) throw new AppError(404, "User prediction not found!");
 
-
-
-
+    return userPrediction;
 }

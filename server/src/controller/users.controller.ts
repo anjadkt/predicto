@@ -19,7 +19,7 @@ export const verifyUser = async (req: Request, res: Response, next: NextFunction
 
         const user = await userService.verifyUser(req.params.userId as string);
 
-        res.status(200).json(new ApiResponse("User verified successfully", user));
+        res.status(200).json(new ApiResponse(`User ${user.isVerified ? "verified" : "unverified"} successfully`, user));
 
     } catch (error) {
         next(error);

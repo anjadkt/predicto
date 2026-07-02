@@ -5,7 +5,9 @@ import { getMatchesController, newMatchsController } from "../controller/match.c
 
 const router = Router();
 
-router.get("/new", authenticateUser, authorize("creator"), newMatchsController);
-router.get("/", authenticateUser, getMatchesController);
+router.use(authenticateUser);
+
+router.get("/new", authorize("creator"), newMatchsController);
+router.get("/", getMatchesController);
 
 export default router;

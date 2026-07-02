@@ -17,9 +17,9 @@ export const createPrediction = async (req: Request, res: Response, next: NextFu
 export const getAllPrediction = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const predictions = await predictionService.getAll(
-            Number(req.query.limit as string),
+            Number(req.query?.limit as string || 10),
             req.user?._id || "",
-            req.query.creator as string
+            req.user?.role as string
         );
         res.status(200).json(
             new ApiResponse("Prediction fetched successfully!", predictions)
@@ -83,14 +83,27 @@ export const getMatchPredictions = async (req: Request, res: Response, next: Nex
     }
 }
 
-// not completed
-
 export const getPredictionResults = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const prediction = await predictionService.results(req.params.id as string);
+        const predictions = await predictionService.results(req.params.id as string);
 
         res.status(200).json(
-            new ApiResponse("Prediction fetched successfully!", prediction)
+            new ApiResponse("Prediction fetched successfully!", predictions)
+        )
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getUserPrediction = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.params.userId as string;
+        const predictionId = req.params.id as string;
+
+        const prediction = await predictionService.userPrediction(userId, predictionId);
+
+        res.status(200).json(
+            new ApiResponse("User prediction fetched successfully", prediction)
         )
     } catch (error) {
         next(error);

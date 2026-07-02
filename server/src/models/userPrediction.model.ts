@@ -48,6 +48,11 @@ const userPredictionSchema = new Schema({
         default: 0
     },
 
+    isEvaluated: {
+        type: Boolean,
+        defalut: false
+    },
+
     predictions: [predictSchema]
 
 }, { timestamps: true });

@@ -8,6 +8,9 @@ export const getAll = async () => {
             $project: {
                 password: 0,
                 refreshToken: 0,
+                createdAt: 0,
+                updatedAt: 0,
+                __v: 0
             }
         },
         {
@@ -19,10 +22,10 @@ export const getAll = async () => {
         {
             $facet: {
                 verified: [
-                    { $match: { isVerified: true } }
+                    { $match: { isVerified: true, role: "predictor" } }
                 ],
                 unverified: [
-                    { $match: { isVerified: false } }
+                    { $match: { isVerified: false, role: "predictor" } }
                 ]
             }
         }
@@ -33,7 +36,7 @@ export const getAll = async () => {
 
 export const verifyUser = async (userId: string) => {
 
-    const user = await User.findById(userId).select("-password -refreshToken");
+    const user = await User.findById(userId).select("-password -refreshToken -createdAt -updatedAt -__v");
 
     if (!user) {
         throw new Error("User not found");

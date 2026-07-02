@@ -3,6 +3,7 @@ export type RegisterPayload = {
     name: string;
     number: string;
     password: string;
+    avatar: string;
 }
 
 export type LoginPayload = Omit<RegisterPayload, "name">;
