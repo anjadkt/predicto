@@ -27,6 +27,11 @@ const scoreSchema = new Schema({
         enum: ["HOME_TEAM", "AWAY_TEAM", null],
         default: null
     },
+    duration: {
+        type: String,
+        enum: ["REGULAR", "EXTRA_TIME", "PENALTY_SHOOTOUT"],
+        default: "REGULAR"
+    },
     fullTime: {
         home: {
             type: Number,

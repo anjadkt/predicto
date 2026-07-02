@@ -10,13 +10,22 @@ const predictSchema = new Schema({
     predictedScores: {
         homeTeam: {
             type: Number,
-            required: true,
-            default: null
+            required: true
         },
         awayTeam: {
             type: Number,
-            required: true,
-            default: null
+            required: true
+        }
+    },
+    results: {
+        points: {
+            type: Number,
+            default: 0
+        },
+        status: {
+            type: String,
+            enum: ["WAITING", "WRONG", "CORRECT"],
+            default: "WAITING"
         }
     }
 })
@@ -33,12 +42,7 @@ const userPredictionSchema = new Schema({
         ref: "User",
         required: true
     },
-    predictions: [predictSchema],
-
-    correctPredictions: {
-        type: Number,
-        default: 0
-    }
+    predictions: [predictSchema]
 
 }, { timestamps: true });
 

@@ -7,6 +7,31 @@ export type MatchQuery = {
 
 }
 
+export type MatchScore = {
+    winner: string | null,
+    duration: "REGULAR" | "EXTRA_TIME" | "PENALTY_SHOOTOUT",
+    fullTime: {
+        home: null | number,
+        away: null | number
+    },
+    halfTime: {
+        home: null | number,
+        away: null | number
+    },
+    regularTime: {
+        home: null | number,
+        away: null | number
+    },
+    extraTime: {
+        home: null | number,
+        away: null | number
+    },
+    penalties: {
+        home: null | number,
+        away: null | number
+    }
+}
+
 
 export type MatchData = {
     apiMatchId: number;
@@ -27,16 +52,6 @@ export type MatchData = {
         tla: string;
         crest: string;
     };
-    score: {
-        winner: string | null;
-        fullTime: {
-            home: null | number;
-            away: null | number;
-        },
-        halfTime: {
-            home: null | number;
-            away: null | number;
-        }
-    },
+    score: MatchScore,
     status: MatchStatus,
 }

@@ -10,7 +10,7 @@ export const syncMatches = async () => {
     } catch (error) {
         console.error("Error syncing matches:", error);
     } finally {
-        setTimeout(syncMatches, 1 * 60 * 1000);
+        setTimeout(syncMatches, 30 * 1000);
     }
 }
 

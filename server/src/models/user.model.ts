@@ -6,7 +6,7 @@ const userSchema = new Schema({
     password: { type: String, required: true },
     isVerified: { type: Boolean, default: false },
     role: { type: String, enum: ["predictor", "creator"], default: "predictor" },
-    points: { type: Number, default: 0 },
+    totalPoints: { type: Number, default: 0 },
     refreshToken: { type: String }
 
 }, { timestamps: true });
