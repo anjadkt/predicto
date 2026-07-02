@@ -151,6 +151,8 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
             await UserPrediction.bulkWrite(predictionUpdates, { session });
         }
 
+        console.log(type === "FINISHED" ? "Finished matches and predictions are updated" : "Live matches and predictions are updated")
+
         await session.commitTransaction();
     } catch (err) {
         await session.abortTransaction();
