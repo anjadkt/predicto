@@ -1,4 +1,4 @@
-import { updateForecast } from "../services/match.service";
+import { updateForecast, updateUserPredictions } from "../services/match.service";
 import { api } from "./api";
 import { formatIsoDate } from "./formatDate";
 
@@ -14,7 +14,9 @@ export const getMatchesFromApi = async (matchIds: any) => {
 
     const { data } = await api.get(url);
 
-    const matchesNewData = data.matches.filter((match: any) => {
+    const matchesNewData = [];
+
+    for (const match of data.matches) {
 
         const TERMINAL_STATUSES = [
             "FINISHED",
@@ -25,16 +27,40 @@ export const getMatchesFromApi = async (matchIds: any) => {
 
         const existingMatch = matchIds.get(match.id);
 
-        if (existingMatch?.status && !TERMINAL_STATUSES.includes(existingMatch.status) && match.status === "FINISHED") {
-            updateForecast({ matchId: existingMatch._id, score: match.score, apiMatchId: match.id });
+        const becameFinished =
+            existingMatch?.status &&
+            !TERMINAL_STATUSES.includes(existingMatch.status) &&
+            match.status === "FINISHED";
+
+        const scoreChanged =
+            existingMatch?.score?.fullTime?.home !== match.score.fullTime.home ||
+            existingMatch?.score?.fullTime?.away !== match.score.fullTime.away;
+
+        const isLive = ["IN_PLAY", "PAUSED", "LIVE"].includes(match.status);
+
+        if (existingMatch) {
+
+            const matchData = {
+                matchId: existingMatch._id,
+                score: match.score,
+                apiMatchId: match.id,
+            };
+
+            if (becameFinished) {
+                await updateForecast(matchData);
+            } else if (isLive && scoreChanged) {
+                await updateUserPredictions(matchData);
+            }
         }
 
-        if (!existingMatch) {
-            return !TERMINAL_STATUSES.includes(match.status);
+        if (
+            !existingMatch ||
+            existingMatch.status !== match.status ||
+            scoreChanged
+        ) {
+            matchesNewData.push(match);
         }
-
-        return existingMatch.status !== match.status || ["IN_PLAY", "PAUSED", "LIVE"].includes(existingMatch.status || "");
-    });
+    }
 
     return matchesNewData;
 };

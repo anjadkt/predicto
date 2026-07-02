@@ -6,12 +6,13 @@ import mongoose from "mongoose";
 import { UserPrediction } from "../models/userPrediction.model";
 import { calculatePoints } from "../utils/calcPoints";
 import { User } from "../models/user.model";
+import { calculateChance } from "../utils/calcChance";
 
 export const sync = async () => {
 
     const matchesLive = await Match
         .find({ status: { $nin: ["FINISHED", "POSTPONED", "SUSPENDED", "CANCELLED"] } })
-        .select("_id apiMatchId status")
+        .select("_id apiMatchId status score")
         .lean();
 
     const matchIds = new Map();
@@ -20,7 +21,8 @@ export const sync = async () => {
         matchesLive.forEach((match) => {
             matchIds.set(match.apiMatchId, {
                 _id: match._id,
-                status: match.status
+                status: match.status,
+                score: match.score
             });
         });
     }
@@ -76,12 +78,16 @@ export const updateForecast = async (match: any) => {
 
         for (const p of userPredictions) {
 
-            const exactPrediction = p.predictions.find(v => v.matchId.toString() === match.matchId.toString());
+            const prediction = p.predictions.find(v => v.matchId.toString() === match.matchId.toString());
 
-            if (!exactPrediction?.predictedScores) continue;
+            if (!prediction) continue;
+
+            const { predictedScores, results } = prediction;
+
+            if (!predictedScores || results?.status === "WRONG") continue;
 
             const points = calculatePoints(
-                exactPrediction.predictedScores,
+                predictedScores,
                 match.score
             );
 
@@ -95,7 +101,7 @@ export const updateForecast = async (match: any) => {
                         $set: {
                             "predictions.$.results": {
                                 points,
-                                status: points ? "CORRECT" : "WRONG"
+                                status: points ? "RIGHT" : "WRONG"
                             }
                         },
                     },
@@ -124,6 +130,71 @@ export const updateForecast = async (match: any) => {
 
         if (userPointUpdates.length) {
             await User.bulkWrite(userPointUpdates, { session });
+        }
+
+        await session.commitTransaction();
+    } catch (err) {
+        await session.abortTransaction();
+        throw err;
+    } finally {
+        session.endSession();
+    }
+}
+
+export const updateUserPredictions = async (match: any) => {
+
+    const session = await mongoose.startSession();
+
+    try {
+
+        const isMatchExist = await Match.findById(match.matchId).select("predictionId");
+        if (!isMatchExist) {
+            throw new AppError(404, "Match not found");
+        }
+
+        session.startTransaction();
+
+        const userPredictions = await UserPrediction.find({
+            predictionId: isMatchExist.predictionId
+        }).session(session);
+
+        const predictionUpdates = [];
+
+        for (const p of userPredictions) {
+
+            const prediction = p.predictions.find(v => v.matchId.toString() === match.matchId.toString());
+
+            if (!prediction) continue;
+
+            const { predictedScores, results } = prediction;
+
+            if (!predictedScores || results?.status === "WRONG") continue;
+
+            const points = calculateChance(
+                predictedScores,
+                match.score
+            );
+
+            predictionUpdates.push({
+                updateOne: {
+                    filter: {
+                        _id: p._id,
+                        "predictions.matchId": match.matchId
+                    },
+                    update: {
+                        $set: {
+                            "predictions.$.results": {
+                                status: points ? "MAYBE" : "WRONG"
+                            }
+                        },
+                    },
+                },
+            });
+
+        }
+
+        if (predictionUpdates.length) {
+            await UserPrediction.bulkWrite(predictionUpdates, { session });
         }
 
         await session.commitTransaction();

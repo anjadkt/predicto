@@ -24,8 +24,8 @@ const predictSchema = new Schema({
         },
         status: {
             type: String,
-            enum: ["WAITING", "WRONG", "CORRECT"],
-            default: "WAITING"
+            enum: ["MAYBE", "WRONG", "RIGHT"],
+            default: "MAYBE"
         }
     }
 })
