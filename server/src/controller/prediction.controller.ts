@@ -18,7 +18,8 @@ export const getAllPrediction = async (req: Request, res: Response, next: NextFu
     try {
         const predictions = await predictionService.getAll(
             Number(req.query.limit as string),
-            req.user?._id || ""
+            req.user?._id || "",
+            req.query.creator as string
         );
         res.status(200).json(
             new ApiResponse("Prediction fetched successfully!", predictions)
