@@ -46,7 +46,8 @@ const userPredictionSchema = new Schema({
     totalPoints: {
         type: Number,
         default: 0
-    }
+    },
+
     predictions: [predictSchema]
 
 }, { timestamps: true });

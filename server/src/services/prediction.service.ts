@@ -182,6 +182,50 @@ export const update = async (predictorId: string, predictionId: string, predicti
 
 }
 
+export const matchPredictions = async (matchId: string) => {
+
+    const match = await Match.findById(matchId).select("-__v -createdAt -updatedAt").lean();
+    if (!match) throw new AppError(404, "Match not found!");
+
+    const userPredictions = await UserPrediction.aggregate([
+        {
+            $match: {
+                predictionId: match.predictionId
+            }
+        },
+        {
+            $unwind: "$predictions"
+        },
+        {
+            $match: {
+                "predictions.matchId": match._id
+            }
+        },
+        {
+            $group: {
+                _id: "$predictions.results.status",
+                count: { $sum: 1 },
+                predictions: {
+                    $push: {
+                        predictorId: "$predictorId",
+                        totalPoints: "$totalPoints",
+                        prediction: "$predictions"
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                status: "$_id",
+                count: 1,
+                predictions: 1
+            }
+        }
+    ])
+    return userPredictions;
+}
+
 
 //not completed
 
@@ -208,24 +252,4 @@ export const results = async (predictionId: string) => {
 
 
 
-}
-
-export const matchPredictions = async (matchId: string) => {
-
-    const match = await Match.findById(matchId).select("-__v -createdAt -updatedAt").lean();
-    if (!match) throw new AppError(404, "Match not found!");
-
-    const userPrediction = await UserPrediction
-        .find({
-            predictionId: match.predictionId
-        })
-        .select("-_v -updatedAt")
-        .populate("predictorId", "name number ")
-        .sort({ createdAt: 1 })
-        .lean();
-
-    return {
-        match,
-        predictions: userPrediction
-    }
 }

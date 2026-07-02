@@ -65,8 +65,6 @@ export const updatePrediction = async (req: Request, res: Response, next: NextFu
     }
 }
 
-// not completed
-
 export const getMatchPredictions = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const matchId = req.params.matchId as string;
@@ -80,6 +78,8 @@ export const getMatchPredictions = async (req: Request, res: Response, next: Nex
         next(error);
     }
 }
+
+// not completed
 
 export const getPredictionResults = async (req: Request, res: Response, next: NextFunction) => {
     try {
