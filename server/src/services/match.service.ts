@@ -7,6 +7,7 @@ import { UserPrediction } from "../models/userPrediction.model";
 import { calculatePoints } from "../utils/calcPoints";
 import { User } from "../models/user.model";
 import { calculateChance } from "../utils/calcChance";
+import { Prediction } from "../models/prediction.model";
 
 export const sync = async () => {
 
@@ -56,7 +57,7 @@ export const sync = async () => {
     }
 }
 
-export const updateForecast = async (match: any) => {
+export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
 
     const session = await mongoose.startSession();
 
@@ -69,90 +70,28 @@ export const updateForecast = async (match: any) => {
 
         session.startTransaction();
 
-        const userPredictions = await UserPrediction.find({
-            predictionId: isMatchExist.predictionId
-        }).session(session);
 
-        const predictionUpdates = [];
-        const userPointUpdates = [];
+        if (type === "FINISHED") {
 
-        for (const p of userPredictions) {
-
-            const prediction = p.predictions.find(v => v.matchId.toString() === match.matchId.toString());
-
-            if (!prediction) continue;
-
-            const { predictedScores, results } = prediction;
-
-            if (!predictedScores || results?.status === "WRONG") continue;
-
-            const points = calculatePoints(
-                predictedScores,
-                match.score
-            );
-
-            predictionUpdates.push({
-                updateOne: {
-                    filter: {
-                        _id: p._id,
-                        "predictions.matchId": match.matchId
-                    },
-                    update: {
-                        $set: {
-                            "predictions.$.results": {
-                                points,
-                                status: points ? "RIGHT" : "WRONG"
-                            }
-                        },
-                    },
-                },
-            });
-
-            if (points) {
-
-                userPointUpdates.push({
-                    updateOne: {
-                        filter: { _id: p.predictorId },
-                        update: {
-                            $inc: {
-                                totalPoints: points,
-                            },
-                        },
-                    },
-                });
-
+            const prediction = await Prediction
+                .findById(isMatchExist.predictionId)
+                .populate("matches.matchId", "status")
+                .select("matches")
+                .session(session);
+            if (!prediction) {
+                throw new AppError(404, "Prediction not found!");
             }
+
+            const isAllFinished = prediction.matches.every(
+                (v: any) => v.matchId.status === "FINISHED"
+            );
+
+            if (isAllFinished) {
+                prediction.status = "COMPLETED";
+                await prediction.save({ session });
+            }
+
         }
-
-        if (predictionUpdates.length) {
-            await UserPrediction.bulkWrite(predictionUpdates, { session });
-        }
-
-        if (userPointUpdates.length) {
-            await User.bulkWrite(userPointUpdates, { session });
-        }
-
-        await session.commitTransaction();
-    } catch (err) {
-        await session.abortTransaction();
-        throw err;
-    } finally {
-        session.endSession();
-    }
-}
-
-export const updateUserPredictions = async (match: any) => {
-
-    const session = await mongoose.startSession();
-
-    try {
-
-        const isMatchExist = await Match.findById(match.matchId).select("predictionId");
-        if (!isMatchExist) {
-            throw new AppError(404, "Match not found");
-        }
-
-        session.startTransaction();
 
         const userPredictions = await UserPrediction.find({
             predictionId: isMatchExist.predictionId
@@ -170,10 +109,22 @@ export const updateUserPredictions = async (match: any) => {
 
             if (!predictedScores || results?.status === "WRONG") continue;
 
-            const points = calculateChance(
-                predictedScores,
-                match.score
-            );
+            let result;
+
+            if (type === "LIVE") {
+                const chance = calculateChance(predictedScores, match.score);
+
+                result = {
+                    status: chance ? "MAYBE" : "WRONG"
+                };
+            } else {
+                const points = calculatePoints(predictedScores, match.score);
+
+                result = {
+                    points,
+                    status: points ? "RIGHT" : "WRONG"
+                };
+            }
 
             predictionUpdates.push({
                 updateOne: {
@@ -183,14 +134,11 @@ export const updateUserPredictions = async (match: any) => {
                     },
                     update: {
                         $set: {
-                            "predictions.$.results": {
-                                status: points ? "MAYBE" : "WRONG"
-                            }
+                            "predictions.$.results": result
                         },
                     },
                 },
             });
-
         }
 
         if (predictionUpdates.length) {

@@ -1,4 +1,4 @@
-import { updateForecast, updateUserPredictions } from "../services/match.service";
+import { updateForecast } from "../services/match.service";
 import { api } from "./api";
 import { formatIsoDate } from "./formatDate";
 
@@ -47,9 +47,9 @@ export const getMatchesFromApi = async (matchIds: any) => {
             };
 
             if (becameFinished) {
-                await updateForecast(matchData);
+                await updateForecast(matchData, "FINISHED");
             } else if (isLive && scoreChanged) {
-                await updateUserPredictions(matchData);
+                await updateForecast(matchData, "LIVE");
             }
         }
 
