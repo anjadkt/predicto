@@ -41,14 +41,30 @@ export const create = async (payload: PredictionPayload) => {
         throw new AppError(400, "Some matches are already used for prediction")
     }
 
-    const matchDate = new Date(matches[0].utcDate);
-    const closesAt = new Date(payload.closesAt);
+    const now = new Date();
+    const closesAtDate = payload.closesAt ? new Date(payload.closesAt) : null;
+    const firstMatchDate = new Date(matches[0].utcDate);
 
-    const date = closesAt > matchDate ? matchDate : closesAt;
+    if (closesAtDate) {
+
+        if (closesAtDate <= now) {
+            throw new AppError(
+                400,
+                "Prediction close time must be in the future."
+            );
+        }
+
+        if (closesAtDate >= firstMatchDate) {
+            throw new AppError(
+                400,
+                "Prediction close time must be before the first match starts."
+            );
+        }
+    }
 
     const prediction = await Prediction.create({
         matches,
-        closesAt: date
+        closesAt: closesAtDate || firstMatchDate
     })
 
     await Match.updateMany({
@@ -152,7 +168,7 @@ export const predict = async (predictorId: string, predictionId: string, predict
     }).lean();
     if (isPredicted) throw new AppError(409, "User already predicted this prediction!");
 
-    if (new Date() > isPredictionExist.closesAt) {
+    if (new Date() >= isPredictionExist.closesAt) {
         throw new AppError(400, "Prediction has been closed.");
     }
 
@@ -180,7 +196,12 @@ export const predict = async (predictorId: string, predictionId: string, predict
     const userPrediction = await UserPrediction.create({
         predictorId,
         predictionId,
-        predictions
+        predictions: predictions.map(
+            (v) => ({
+                matchId: v.matchId,
+                predictedScores: v.predictedScores
+            })
+        )
     });
 
     return {
@@ -228,7 +249,12 @@ export const update = async (predictorId: string, predictionId: string, predicti
         },
         {
             $set: {
-                predictions
+                predictions: predictions.map(
+                    (v) => ({
+                        matchId: v.matchId,
+                        predictedScores: v.predictedScores
+                    })
+                )
             }
         },
         {
@@ -347,7 +373,10 @@ export const userPrediction = async (predictorId: string, predictionId: string) 
             predictorId,
             predictionId
         })
-        .populate("predictions.matchId", "awayTeam homeTeam time")
+        .populate({
+            path: "predictions.matchId",
+            select: "awayTeam.name awayTeam.shortName awayTeam.tla awayTeam.crest homeTeam.name homeTeam.shortName homeTeam.tla homeTeam.crest time"
+        })
         .select("totalPoints predictions")
         .lean();
 
