@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import RootRedirect from "./routes/RootRedirect";
 import MainLayout from './layouts/MianLayout';
+import PredictionPage from './pages/Prediction';
 
 function App() {
 
@@ -23,7 +24,7 @@ function App() {
 
           <Route element={<MainLayout />}>
 
-            <Route path="/creator/dashboard" element={<></>} />
+            <Route path="/" element={<PredictionPage />} />
             <Route path="/creator/predictions" element={<></>} />
             <Route path="/creator/profile" element={<></>} />
 

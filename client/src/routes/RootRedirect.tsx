@@ -1,5 +1,5 @@
 import { Navigate } from "react-router";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../hooks/UseAuth";
 import PageLoading from "../components/PageLoading";
 
 const RootRedirect = () => {
@@ -19,7 +19,7 @@ const RootRedirect = () => {
             return <Navigate to="/create-prediction" replace />;
 
         case "predictor":
-            return <Navigate to="/predictions" replace />;
+            return <Navigate to="/" replace />;
 
         default:
             return <Navigate to="/login" replace />;

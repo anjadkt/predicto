@@ -4,16 +4,16 @@ export const MAIN_LAYOUT_DATA = {
         heading: "predicto",
         navlinks: [
             {
-                title: "Dashboard",
-                href: "/dashboard"
+                icon: "prediction",
+                href: "/"
             },
             {
-                title: "Profile",
-                href: "/profile"
+                icon: "live",
+                href: "/live"
             },
             {
-                title: "Logout",
-                href: "/logout"
+                icon: "leaderboard",
+                href: "/leaderboard"
             }
         ]
     },
@@ -21,16 +21,16 @@ export const MAIN_LAYOUT_DATA = {
         heading: "predicto admin",
         navlinks: [
             {
-                title: "Dashboard",
-                href: "/dashboard"
+                icon: "users",
+                href: "/users"
             },
             {
-                title: "Profile",
-                href: "/profile"
+                icon: "create",
+                href: "/create-prediction"
             },
             {
-                title: "Logout",
-                href: "/logout"
+                icon: "leaderboard",
+                href: "/score-manage"
             }
         ]
     }

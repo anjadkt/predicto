@@ -146,6 +146,7 @@ export const getAll = async (limit = 10, predictorId: string, role: string) => {
             .find({ predictorId })
             .populate("predictions.matchId", "awayTeam homeTeam score")
             .select("-_v -updatedAt")
+            .sort({createdAt : -1})
             .limit(limit)
             .lean();
     }
