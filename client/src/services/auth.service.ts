@@ -6,6 +6,17 @@ export const getRefresh = async () => {
     return data.response;
 };
 
+export const loginUser = async (
+    payload: {
+        number: string,
+        password: string
+    }
+) => {
+    const { data } = await api.post("/auth/login", payload);
+
+    return data.response;
+}
+
 
 export const getProfile = async () => {
     const { data } = await api.get("/auth/me");

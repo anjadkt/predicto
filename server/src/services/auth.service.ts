@@ -50,7 +50,7 @@ export const login = async (payload: LoginPayload) => {
     if (!user.isVerified) throw new AppError(401, "User not verified by admin");
 
     const passMatch = await bcrypt.compare(password, user.password);
-    if (!passMatch) throw new AppError(401, "Invalid password");
+    if (!passMatch) throw new AppError(406, "Invalid password");
 
     const accessToken = createToken({
         _id: user._id,
