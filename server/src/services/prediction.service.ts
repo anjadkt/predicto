@@ -201,7 +201,8 @@ export const predict = async (predictorId: string, predictionId: string, predict
                 matchId: v.matchId,
                 predictedScores: v.predictedScores
             })
-        )
+        ),
+        isEvaluated: false
     });
 
     return {
@@ -272,6 +273,8 @@ export const matchPredictions = async (matchId: string) => {
     const match = await Match.findById(matchId).select("-__v -createdAt -updatedAt").lean();
     if (!match) throw new AppError(404, "Match not found!");
 
+    const isStarted = ["IN_PLAY", "PAUSED", "LIVE"].includes(match.status);
+
     const userPredictions = await UserPrediction.aggregate([
         {
             $match: {
@@ -287,14 +290,40 @@ export const matchPredictions = async (matchId: string) => {
             }
         },
         {
+            $lookup: {
+                from: "users",
+                let: { userId: "$predictorId" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $eq: ["$_id", "$$userId"]
+                            }
+                        }
+                    },
+                    {
+                        $project: {
+                            name: 1,
+                            avatar: 1,
+                            totalPoints: 1
+                        }
+                    }
+                ],
+                as: "predictor"
+            }
+        },
+        {
+            $unwind: "$predictor"
+        },
+        {
             $group: {
                 _id: "$predictions.results.status",
                 count: { $sum: 1 },
                 predictions: {
                     $push: {
-                        predictorId: "$predictorId",
-                        totalPoints: "$totalPoints",
-                        prediction: "$predictions"
+                        predictor: "$predictor",
+                        points: "$totalPoints",
+                        prediction: "$predictions.predictedScores"
                     }
                 }
             }

@@ -13,6 +13,6 @@ router.get("/:id/user/:userId", authorize("creator"), getUserPrediction);
 router.post("/", authorize("creator"), createPrediction);
 router.post("/:id/predict", userPrediction);
 router.patch("/:id/predict", updatePrediction);
-router.get("/match/:matchId", getMatchPredictions);
+router.get("/match/:matchId", getMatchPredictions); // need to test
 
 export default router;

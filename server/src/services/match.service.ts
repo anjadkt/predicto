@@ -179,7 +179,7 @@ export const matches = async (limit: number) => {
     const matches = await Match.aggregate([
         {
             $match: {
-                status: { $in: ["IN_PLAY", "PAUSED", "FINISHED"] },
+                status: { $in: ["IN_PLAY", "PAUSED", "LIVE", "FINISHED"] },
                 isUsed: false
             }
         },

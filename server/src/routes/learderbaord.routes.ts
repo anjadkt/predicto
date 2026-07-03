@@ -9,6 +9,6 @@ router.use(authenticateUser);
 
 router.get("/", getLeaderboard);
 router.patch("/:id", authorize("creator"), updateScore);
-router.get("/:id", authorize("creator"), updateLeaderboard)
+router.post("/:id", authorize("creator"), updateLeaderboard)
 
 export default router;

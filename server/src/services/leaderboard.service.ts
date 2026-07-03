@@ -42,11 +42,12 @@ export const updateLeaderboard = async (predictionId: string) => {
     const session = await mongoose.startSession();
 
     try {
-        await session.commitTransaction();
+        session.startTransaction();
 
-        const prediction = await Prediction.findById(predictionId);
+        const prediction = await Prediction.findById(predictionId).session(session);;
         if (!prediction) throw new AppError(404, "Prediction not found!");
         if (prediction.isEvaluated) throw new AppError(400, "Prediction is already evaluated!");
+        if (prediction.status === "LIVE") throw new AppError(403, "Cannot update now prediction is live!");
 
         const matches = await Match
             .find({
@@ -54,7 +55,8 @@ export const updateLeaderboard = async (predictionId: string) => {
                     $in: prediction.matches.map(v => v.matchId)
                 },
                 status: "FINISHED"
-            });
+            })
+            .session(session);
 
         if (matches.length !== prediction.matches.length) {
             throw new AppError(400, "Some matches are not finished yet!");
@@ -67,7 +69,8 @@ export const updateLeaderboard = async (predictionId: string) => {
             })
             .populate("predictorId", "name avatar")
             .sort({ totalPoints: -1 })
-            .select("_id predictorId totalPoints");
+            .select("_id predictorId totalPoints")
+            .session(session);
 
         if (!userPredictions.length) {
             throw new AppError(400, "All users predictions are already evaluated!");
