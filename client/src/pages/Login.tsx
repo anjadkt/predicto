@@ -61,7 +61,7 @@ function Login() {
                 case 404:
                     errorObj.number = "User not found!"
                     break;
-                case 401:
+                case 403:
                     errorObj.number = "User not verified!"
                     break;
                 case 406:
@@ -145,7 +145,6 @@ function Login() {
                         <div className="pt-2">
                             <button
                                 type="submit"
-                                disabled={isSubmitting || !!errors.number || !!errors.password}
                                 className="flex w-full justify-center rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-600 px-4 py-3.5 text-sm font-semibold leading-6 text-white shadow-[0_0_15px_rgba(16,185,129,0.5)] hover:shadow-[0_0_25px_rgba(16,185,129,0.7)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
                             >
                                 {isSubmitting ? (

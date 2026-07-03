@@ -17,7 +17,6 @@ export const loginUser = async (
     return data.response;
 }
 
-
 export const getProfile = async () => {
     const { data } = await api.get("/auth/me");
 
@@ -27,3 +26,14 @@ export const getProfile = async () => {
 export const logoutUser = async () => {
     await api.get("/auth/logout");
 };
+
+export const registerUser = async (payload: {
+    name: string,
+    number: string,
+    password: string,
+    avatar: string
+}) => {
+    const { data } = await api.post("/auth/register", payload);
+
+    return data.response;
+}

@@ -19,5 +19,13 @@ export const validateField = (name: string, value: string) => {
             errorMsg = 'Password must be at least 6 characters';
         }
     }
+    if (name === 'name') {
+        if (!value) {
+            errorMsg = 'Name is required';
+        } else if (value.trim().length < 3) {
+            errorMsg = 'Name must be at least 3 characters';
+        }
+    }
+
     return errorMsg;
 };
