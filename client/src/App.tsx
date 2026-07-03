@@ -4,6 +4,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import RootRedirect from "./routes/RootRedirect";
+import MainLayout from './layouts/MianLayout';
 
 function App() {
 
@@ -18,8 +19,28 @@ function App() {
           <Route path="/register" element={<Register />} />
         </Route>
 
-        <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<></>} />
+        <Route element={<ProtectedRoute role='predictor' />}>
+
+          <Route element={<MainLayout />}>
+
+            <Route path="/creator/dashboard" element={<></>} />
+            <Route path="/creator/predictions" element={<></>} />
+            <Route path="/creator/profile" element={<></>} />
+
+          </Route>
+
+        </Route>
+
+        <Route element={<ProtectedRoute role='creator' />}>
+
+          <Route element={<MainLayout />}>
+
+            <Route path="/creator/dashboard" element={<></>} />
+            <Route path="/creator/predictions" element={<></>} />
+            <Route path="/creator/profile" element={<></>} />
+
+          </Route>
+
         </Route>
 
       </Routes >

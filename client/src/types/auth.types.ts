@@ -1,8 +1,10 @@
+export type UserRoles = "predictor" | "creator"
+
 export interface User {
     _id: string;
     name: string;
     number: number;
-    role: "predictor" | "creator";
+    role: UserRoles;
     avatar: string;
     isVerified: boolean
 }
