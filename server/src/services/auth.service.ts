@@ -67,6 +67,7 @@ export const login = async (payload: LoginPayload) => {
 
     return {
         user: {
+            _id: user._id,
             name: user.name,
             number: user.number,
             role: user.role,
@@ -123,7 +124,7 @@ export const logout = async function (userId: string) {
 
 export const getMe = async (userId: string) => {
 
-    const user = await User.findById(userId).select("-password -refreshToken");
+    const user = await User.findById(userId).select("-password -__v -updatedAt -refreshToken");
     if (!user) throw new AppError(404, "User not found");
 
     return user;
