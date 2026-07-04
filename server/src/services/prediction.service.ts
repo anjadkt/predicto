@@ -92,51 +92,35 @@ export const getAll = async (limit = 10, predictorId: string, role: string) => {
 
     const predictions = await Prediction.aggregate([
         {
-            $facet: {
-                live: [
-                    {
-                        $match: {
-                            status: "LIVE",
-                        },
-                    },
-                    {
-                        $sort: {
-                            closesAt: -1,
-                        },
-                    },
-                    {
-                        $project: {
-                            __v: 0,
-                            isEvaluated: 0,
-                            updatedAt: 0
-                        }
-                    }
+            $addFields: {
+            statusOrder: {
+                $switch: {
+                branches: [
+                    { case: { $eq: ["$status", "LIVE"] }, then: 0 },
+                    { case: { $eq: ["$status", "COMPLETED"] }, then: 1 },
                 ],
-
-                completed: [
-                    {
-                        $match: {
-                            status: "COMPLETED",
-                        },
-                    },
-                    {
-                        $sort: {
-                            closesAt: -1,
-                        },
-                    },
-                    {
-                        $limit: limit,
-                    },
-                    {
-                        $project: {
-                            __v: 0,
-                            isEvaluated: 0,
-                            updatedAt: 0
-                        }
-                    }
-                ],
+                default: 2,
+                },
+            },
             },
         },
+        {
+            $sort: {
+            statusOrder: 1,
+            closesAt: -1,
+            },
+        },
+        {
+            $limit: limit,
+        },
+        {
+            $project: {
+            __v: 0,
+            isEvaluated: 0,
+            updatedAt: 0,
+            statusOrder: 0,
+            },
+        }
     ]);
 
     let userPredictions: any = [];
@@ -145,14 +129,14 @@ export const getAll = async (limit = 10, predictorId: string, role: string) => {
         userPredictions = await UserPrediction
             .find({ predictorId })
             .populate("predictions.matchId", "awayTeam homeTeam score")
-            .select("-_v -updatedAt")
+            .select("-__v -updatedAt")
             .sort({createdAt : -1})
             .limit(limit)
             .lean();
     }
 
     return {
-        predictions: predictions[0] || { live: [], completed: [] },
+        predictions,
         userPredictions
     };
 
