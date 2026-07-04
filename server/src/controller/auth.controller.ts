@@ -7,14 +7,16 @@ const accessOptions = {
     httpOnly: true,
     secure: env.NODE_ENV === "production",
     maxAge: 15 * 60 * 1000,
-    sameSite: "lax"
+    sameSite: "none",
+    partitioned : true
 } as CookieOptions
 
 const refreshOptions = {
     httpOnly: true,
     secure: env.NODE_ENV === "production",
     maxAge: 7 * 24 * 60 * 60 * 1000,
-    sameSite: "lax"
+    sameSite: "none",
+    partitioned : true
 } as CookieOptions
 
 export const registerController = async (req: Request, res: Response, next: NextFunction) => {
