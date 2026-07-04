@@ -2,7 +2,13 @@ import type { LivePrediction, PredictionMatch  } from "../types/prediction.types
 import { Swords ,Clock, Activity  } from 'lucide-react';
 import { formatPredictionCloseTime } from "../utils/FormatDate";
 
-export default function PredictionComp({ prediction }: { prediction: LivePrediction }) {
+export default function PredictionComp(
+  { prediction, handleCreate }: 
+  { prediction: LivePrediction, handleCreate : (data:LivePrediction) => void}
+) {
+
+  const closesAtTime = prediction.closesAt;
+  const isClosed = closesAtTime ? new Date() < new Date(closesAtTime) : false;
 
   const statusUpper = prediction.status.toUpperCase();
   const isLive = statusUpper === 'LIVE';
@@ -43,8 +49,10 @@ export default function PredictionComp({ prediction }: { prediction: LivePredict
       </div>
 
       {/* Action Button */}
-      { !isCompleted && (
-        <button className="w-full bg-black active:scale-[0.99] text-white text-sm font-semibold py-2 px-4 rounded-xl shadow-sm transition-all duration-150 tracking-wide mt-1">
+      { !isCompleted && isClosed && (
+        <button 
+          onClick={() => handleCreate(prediction)}
+          className="w-full bg-black active:scale-[0.99] text-white text-sm font-semibold py-2 px-4 rounded-xl shadow-sm transition-all duration-150 tracking-wide mt-1">
           Predict Now
         </button>
       )}

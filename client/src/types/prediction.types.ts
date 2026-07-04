@@ -94,3 +94,19 @@ export type UserPrediction = {
   predictions: UserMatchPrediction[];
   createdAt: string;
 }
+
+
+export type ModalPayload = {
+  isUpdate : boolean;
+  matches : {
+    matchId : string,
+    predictedScores : {
+      homeTeam : number;
+      awayTeam : number
+    },
+    homeTeam : Team,
+    awayTeam : Team
+  }[],
+  predictionId : string;
+}
+  

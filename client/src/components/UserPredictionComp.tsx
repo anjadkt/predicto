@@ -1,7 +1,10 @@
 import { Swords, CheckCircle2, XCircle, AlertCircle, Edit2 } from "lucide-react";
-import type { UserMatchPrediction, UserPrediction } from "../types/prediction.types";
+import type { ModalPayload, UserMatchPrediction, UserPrediction } from "../types/prediction.types";
 
-export default function UserPredictionComp({ prediction }: { prediction: UserPrediction }) {
+export default function UserPredictionComp(
+  { prediction, handleUpdate }: 
+  { prediction: UserPrediction, handleUpdate:(data:UserPrediction) => ModalPayload }
+) {
   
   const closesAtTime = prediction.predictionId?.closesAt;
   const isUpdatable = closesAtTime ? new Date() < new Date(closesAtTime) : false;
@@ -19,7 +22,9 @@ export default function UserPredictionComp({ prediction }: { prediction: UserPre
       {/* Update Button */}
       {isUpdatable && (
         <div className="pt-2 flex justify-center border-t border-gray-200/60 mt-1">
-          <button className="w-full md:w-auto flex items-center justify-center gap-2 bg-900  active:scale-[0.98] text-white text-sm font-bold py-2.5 px-6 rounded-xl shadow-sm transition-all duration-200">
+          <button 
+            onClick={() => handleUpdate(prediction)}
+            className="w-full md:w-auto flex items-center justify-center gap-2 bg-900  active:scale-[0.98] text-white text-sm font-bold py-2.5 px-6 rounded-xl shadow-sm transition-all duration-200">
             <Edit2 className="w-4 h-4" />
             Update Prediction
           </button>
@@ -99,7 +104,7 @@ function MatchComp({ match }: { match: UserMatchPrediction }) {
   };
 
   return (
-    <div className="flex flex-col bg-white rounded-2xl border border-gray-200 shadow-sm p-4 w-full transition-shadow hover:shadow-md">
+    <div className="flex flex-col min-w-[260px] bg-white rounded-2xl border border-gray-200 shadow-sm p-4 w-full transition-shadow hover:shadow-md">
       
       {/* Sub-header: Match Status Line */}
       <div className="flex items-center justify-between mb-2">

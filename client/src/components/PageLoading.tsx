@@ -1,6 +1,7 @@
 function PageLoading() {
   return (
-    <div className="w-full min-h-[350px] flex flex-col items-center justify-center p-8 bg-transparent">
+
+    <div className="fixed inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
       
       <div className="flex items-center space-x-3">
         <div className="w-3.5 h-3.5 rounded-full bg-indigo-400 shadow-[0_0_14px_rgba(99,102,241,0.6)] animate-bounce"></div>
