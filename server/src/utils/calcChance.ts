@@ -17,8 +17,6 @@ export const calculateChance = (
             ? calcExtraTime()
             : score.fullTime;
 
-    console.log("chance calculated!")
-
     return (
         matchScore.home !== null &&
         matchScore.away !== null &&

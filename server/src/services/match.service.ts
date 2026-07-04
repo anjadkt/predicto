@@ -64,7 +64,7 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
 
         session.startTransaction();
 
-        const isMatchExist = await Match.findById(match.matchId);
+        const isMatchExist = await Match.findById(match.matchId).session(session);
         if (!isMatchExist) {
             throw new AppError(404, "Match not found");
         }
@@ -112,7 +112,10 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
             if (type === "LIVE") {
                 const chance = calculateChance(predictedScores, match.score);
 
+                if(chance)continue;
+
                 result = {
+                    points: 0,
                     status: chance ? "MAYBE" : "WRONG"
                 };
             } else {
@@ -151,7 +154,6 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
             await UserPrediction.bulkWrite(predictionUpdates, { session });
         }
 
-        console.log(type === "FINISHED" ? "Finished matches and predictions are updated" : "Live matches and predictions are updated")
 
         await session.commitTransaction();
     } catch (err) {
