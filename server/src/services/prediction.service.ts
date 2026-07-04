@@ -128,7 +128,16 @@ export const getAll = async (limit = 10, predictorId: string, role: string) => {
     if (role !== "creator") {
         userPredictions = await UserPrediction
             .find({ predictorId })
-            .populate("predictions.matchId", "awayTeam homeTeam score")
+            .populate([
+                { 
+                    path: "predictions.matchId",
+                    select : "awayTeam homeTeam score time status"
+                },
+                {
+                    path : "predictionId",
+                    select : "closesAt"
+                }
+            ])
             .select("-__v -updatedAt")
             .sort({createdAt : -1})
             .limit(limit)

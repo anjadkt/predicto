@@ -53,11 +53,16 @@ export type MatchScore = {
   penalties: ScoreTime;
 }
 
+type MatchStatus = "SCHEDULED" | "TIMED" | "IN_PLAY" | "PAUSED" | "FINISHED" | "POSTPONED" | "SUSPENDED" | "CANCELLED" | "LIVE"
+
 export type Match = {
   _id: string;
   homeTeam: Team;
   awayTeam: Team;
   score: MatchScore;
+  utcDate : string;
+  time:string;
+  status : MatchStatus
 }
 
 export type PredictedScores = {
@@ -79,7 +84,10 @@ export type UserMatchPrediction = {
 
 export type UserPrediction = {
   _id: string;
-  predictionId: string;
+  predictionId: {
+    _id : string,
+    closesAt : string
+  };
   predictorId: string;
   totalPoints: number;
   isEvaluated: boolean;

@@ -9,7 +9,7 @@ export default function PredictionComp({ prediction }: { prediction: LivePredict
   const isCompleted = statusUpper === 'COMPLETED';
 
   return (
-    <div className={`bg-white min-w-[270px] rounded-2xl  p-3 border border-gray-100 flex flex-col gap-3 w-full transition-all 
+    <div className={`bg-white min-w-[270px] min-h-[200px] rounded-2xl  p-3 border border-gray-100 flex flex-col gap-3 w-full transition-all 
       ${isCompleted 
         ? "opacity-60 shadow-none pointer-events-none" 
         : "shadow-sm hover:shadow-md"
@@ -44,7 +44,7 @@ export default function PredictionComp({ prediction }: { prediction: LivePredict
 
       {/* Action Button */}
       { !isCompleted && (
-        <button className="w-full bg-black active:scale-[0.99] text-white text-xs font-semibold py-2 px-4 rounded-xl shadow-sm transition-all duration-150 tracking-wide mt-1">
+        <button className="w-full bg-black active:scale-[0.99] text-white text-sm font-semibold py-2 px-4 rounded-xl shadow-sm transition-all duration-150 tracking-wide mt-1">
           Predict Now
         </button>
       )}
@@ -58,7 +58,7 @@ function MatchComp({ match, isCompleted }: { match: PredictionMatch; isCompleted
   
   return (
     
-    <div className="flex items-center justify-between bg-gray-100/80 px-2.5 py-1.5 rounded-xl border border-gray-100/60 flex-1 min-w-[140px] max-w-full sm:max-w-[49%]">
+    <div className="flex items-center justify-between bg-gray-100/80 px-2.5 py-1.5 rounded-xl border border-gray-100/60 flex-1 min-w-[140px] max-w-full ">
       
       {/* Home Team */}
       <div className="flex flex-col items-center flex-1">

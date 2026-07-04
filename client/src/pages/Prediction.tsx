@@ -3,12 +3,13 @@ import PredictionComp from "../components/PredictionComp";
 import type { LivePrediction, UserPrediction } from "../types/prediction.types";
 import { getPredictions } from "../services/predictions.service";
 import PageLoading from "../components/PageLoading";
+import UserPredictionComp from "../components/UserPredictionComp";
 
 function PredictionPage() {
 
     const [ loading, setLoading ] = useState(false);
     const [ predictions, setPredictions ] = useState<LivePrediction[] | null>(null);
-    const [ userPredictions, setUserPredictions ] = useState<UserPrediction | null>(null);
+    const [ userPredictions, setUserPredictions ] = useState<UserPrediction[] | null>(null);
 
     const fetchPredictions = async () => {
 
@@ -44,9 +45,12 @@ function PredictionPage() {
                 {/* NEW PREDICTIONS --- */}
                 <section>
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
-                            | Predictions Live
-                        </h2>
+                        <div className="flex items-center gap-3">
+                            <div className="w-1.5 h-7 bg-emerald-500 rounded-full" />
+                            <h2 className="font-display-sports text-3xl uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
+                            Live Predictions
+                            </h2>
+                        </div>
                     </div>
 
                     <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-emerald-500/30 ring-1 ring-inset ring-white/10">
@@ -58,14 +62,25 @@ function PredictionPage() {
                     </div>
                 </section>
 
-                {/*PAST PREDICTIONS --- */}
-                <section>
-                    <h2 className="text-2xl font-bold text-slate-300 mb-6">| Your Predictions</h2>
-                    
-                    <div className="bg-[#FDFBF7] rounded-3xl p-8 shadow-xl border border-slate-200">
-                        <div className="space-y-4">
-                            
-                            
+                {/* PAST PREDICTIONS --- */}
+                <section className="mt-10">
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3 opacity-70">
+                            <div className="w-1.5 h-7 bg-slate-400 rounded-full" />
+                            <h2 className="font-display-sports text-2xl uppercase tracking-wider text-slate-400 font-bold">
+                                Your Predictions
+                            </h2>
+                        </div>
+                    </div>
+
+                    <div className="bg-transparent rounded-3xl p-4 md:p-6 border border-slate-300/60 border-dashed">
+        
+                        <div className="flex overflow-x-auto gap-5 pb-2 snap-x hide-scrollbar">
+                            {userPredictions.map((v) => (
+                                <div key={v._id} className="snap-start shrink-0">
+                                    <UserPredictionComp prediction={v} />
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </section>
