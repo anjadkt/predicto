@@ -17,7 +17,7 @@ export default function UserPredictionComp({ prediction }: { prediction: UserPre
       </div>
 
       {/* Update Button */}
-      {(
+      {isUpdatable && (
         <div className="pt-2 flex justify-center border-t border-gray-200/60 mt-1">
           <button className="w-full md:w-auto flex items-center justify-center gap-2 bg-900  active:scale-[0.98] text-white text-sm font-bold py-2.5 px-6 rounded-xl shadow-sm transition-all duration-200">
             <Edit2 className="w-4 h-4" />
