@@ -13,7 +13,9 @@ function MainLayout() {
     return (
         <>
             <Header title={data.heading}  />
-            <main>
+            <main className="bg-slate-950 relative">
+                <div className="fixed -top-32 -left-32 w-96 h-96 bg-emerald-500 rounded-full mix-blend-screen filter blur-[128px] opacity-30 animate-pulse"></div>
+                <div className="fixed -bottom-32 -right-32 w-96 h-96 bg-cyan-600 rounded-full mix-blend-screen filter blur-[128px] opacity-30 animate-pulse" style={{ animationDelay: '1s' }}></div>
                 <Outlet />
             </main>
             <NavBar navlinks={data.navlinks} />

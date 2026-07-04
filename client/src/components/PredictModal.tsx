@@ -28,9 +28,7 @@ export default function PredictModal({
 
   const handleScoreChange = (matchId: string, team: "home" | "away", value: string) => {
     
-    const numValue = value === "" ? 0 : parseInt(value, 10);
-    
-    if (isNaN(numValue) || numValue < 0) return;
+    if (!/^\d*$/.test(value)) return;
 
     setMatchPredictions((prev) =>
       prev.map((m) => {
@@ -39,7 +37,7 @@ export default function PredictModal({
             ...m,
             predictedScores: {
               ...m.predictedScores,
-              [team === "home" ? "homeTeam" : "awayTeam"]: numValue,
+              [team === "home" ? "homeTeam" : "awayTeam"]: value,
             },
           };
         }
@@ -52,8 +50,11 @@ export default function PredictModal({
 
     const formatedPayload = matchPredictions.map(v => ({
       matchId : v.matchId, 
-      predictedScores : v.predictedScores
-    }))
+      predictedScores : {
+        homeTeam : Number(v.predictedScores.homeTeam),
+        awayTeam : Number(v.predictedScores.awayTeam)
+      }
+    }));
     
     try{
       setLoading(true);
@@ -82,7 +83,7 @@ export default function PredictModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-opacity">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-8 bg-black/40 backdrop-blur-sm transition-opacity">
       
       <div className="bg-white w-full max-w-xl rounded-[24px] shadow-2xl border border-gray-100 flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
