@@ -1,13 +1,13 @@
 import { Navigate } from "react-router";
 import { useAuth } from "../hooks/UseAuth";
-import PageLoading from "../components/PageLoading";
+import SiteLoading from "../components/SiteLoading";
 
 const RootRedirect = () => {
 
     const { user, loading } = useAuth();
 
     if (loading) {
-        return <PageLoading />;
+        return <SiteLoading />;
     }
 
     if (!user) {

@@ -1,3 +1,8 @@
+import { useEffect, useState } from "react";
+import PredictionComp from "../components/PredictionComp";
+import type { LivePrediction, UserPrediction } from "../types/prediction.types";
+import { getPredictions } from "../services/predictions.service";
+import PageLoading from "../components/PageLoading";
 
 const topPrediction = {
     "_id": "6a476e98821a4308dd7ebfbc",
@@ -66,49 +71,54 @@ const pastPrediction = {
 };
 
 function PredictionPage() {
+
+    const [ loading, setLoading ] = useState(false);
+    const [ predictions, setPredictions ] = useState<LivePrediction[] | null>(null);
+    const [ userPredictions, setUserPredictions ] = useState<UserPrediction | null>(null);
+
+    const fetchPredictions = async () => {
+
+        setLoading(true);
+        try{
+
+            const data = await getPredictions();
+            setPredictions(data.predictions);
+            setUserPredictions(data.userPredictions);
+
+        }catch(error){
+            console.log("prediction listing error!",error);
+        }finally{
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        fetchPredictions();
+    },[]);
+
+    if(loading || !predictions)return <PageLoading />
+
+
     return (
         <div className="min-h-screen bg-slate-950 relative overflow-hidden font-sans pb-20">
             {/* Background Animations */}
             <div className="fixed -top-32 -left-32 w-96 h-96 bg-emerald-500 rounded-full mix-blend-screen filter blur-[128px] opacity-30 animate-pulse"></div>
             <div className="fixed -bottom-32 -right-32 w-96 h-96 bg-cyan-600 rounded-full mix-blend-screen filter blur-[128px] opacity-30 animate-pulse" style={{ animationDelay: '1s' }}></div>
 
-            <div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-12 lg:px-8 space-y-16">
+            <div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-12 lg:px-8 space-y-10">
                 
                 {/* --- TOP SECTION: NEW PREDICTIONS --- */}
                 <section>
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
-                            Live Prediction Pool
+                            | Predictions Live
                         </h2>
-                        <span className="px-3 py-1 text-xs font-semibold tracking-wider text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-full">
-                            {topPrediction.status}
-                        </span>
                     </div>
 
                     <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-emerald-500/30 ring-1 ring-inset ring-white/10">
-                        <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
-                            {topPrediction.matches.map((match, idx) => (
-                                <div key={idx} className="bg-slate-900/60 rounded-2xl p-6 border border-white/5 hover:border-emerald-500/50 transition-colors duration-300">
-                                    <div className="text-center mb-4">
-                                        <p className="text-emerald-400 text-sm font-semibold">{match.date}</p>
-                                        <p className="text-slate-400 text-xs">{match.time}</p>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        {/* Home Team */}
-                                        <div className="flex flex-col items-center gap-2 w-1/3">
-                                            <img src={match.homeTeam.crest} alt={match.homeTeam.name} className="w-12 h-12 object-contain" />
-                                            <span className="text-slate-200 font-medium text-sm text-center">{match.homeTeam.name}</span>
-                                        </div>
-                                        
-                                        <div className="text-slate-500 font-bold text-lg">VS</div>
-                                        
-                                        {/* Away Team */}
-                                        <div className="flex flex-col items-center gap-2 w-1/3">
-                                            <img src={match.awayTeam.crest} alt={match.awayTeam.name} className="w-12 h-12 object-contain" />
-                                            <span className="text-slate-200 font-medium text-sm text-center">{match.awayTeam.name}</span>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div className="overflow-auto flex gap-5">
+                            {predictions.map((prediction) => (
+                                <PredictionComp key={prediction._id} prediction={prediction} />
                             ))}
                         </div>
                     </div>
@@ -116,7 +126,7 @@ function PredictionPage() {
 
                 {/* --- BOTTOM SECTION: PAST PREDICTIONS --- */}
                 <section>
-                    <h2 className="text-2xl font-bold text-slate-300 mb-6">Past Predictions</h2>
+                    <h2 className="text-2xl font-bold text-slate-300 mb-6">| Your Predictions</h2>
                     
                     {/* Creamy White Background Container */}
                     <div className="bg-[#FDFBF7] rounded-3xl p-8 shadow-xl border border-slate-200">
