@@ -3,19 +3,33 @@ import ApiResponse from "../utils/ApiResponse.js";
 import * as authServices from "../services/auth.service.js";
 import { env } from "../config/env.js";
 
-const accessOptions = {
+const accessOptions:CookieOptions = env.NODE_ENV === "production" ? {
     httpOnly: true,
-    secure: env.NODE_ENV === "production",
+    secure: true,
+    maxAge: 15 * 60 * 1000,
+    sameSite: "none",
+    partitioned : true
+} : {
+    httpOnly: true,
+    secure: false,
     maxAge: 15 * 60 * 1000,
     sameSite: "lax"
-} as CookieOptions
+    
+}
 
-const refreshOptions = {
+const refreshOptions:CookieOptions = env.NODE_ENV === "production" ? {
     httpOnly: true,
-    secure: env.NODE_ENV === "production",
+    secure: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    sameSite: "none",
+    partitioned : true
+} : {
+    httpOnly: true,
+    secure: false,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     sameSite: "lax"
-} as CookieOptions
+    
+}
 
 export const registerController = async (req: Request, res: Response, next: NextFunction) => {
     try {
