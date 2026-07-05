@@ -6,7 +6,8 @@ export default function LiveMatch(
   { matches: Match[], activeMatchId : string | null, setActiveMatchId : (id:string) => void }
 ) {
 
-  const getMatchTimelineStatus = (status: string) => {
+  const getMatchTimelineStatus = (status: string,time:string) => {
+
     const s = status.toUpperCase();
 
     if (["IN_PLAY", "PAUSED", "LIVE"].includes(s)) {
@@ -14,7 +15,7 @@ export default function LiveMatch(
     }
 
     if(["SCHEDULED" , "TIMED"].includes(s)){
-      return { text : "COMING", isLive : false}
+      return { text : time || "COMING", isLive : false}
     }
 
     if (s === "FINISHED") {
@@ -48,7 +49,7 @@ export default function LiveMatch(
         {matches.map((v) => {
 
           const score = getActualScores(v.score);
-          const statusInfo = getMatchTimelineStatus(v.status);
+          const statusInfo = getMatchTimelineStatus(v.status,v.time);
           const isActive = activeMatchId === v._id;
 
           return (

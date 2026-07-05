@@ -16,6 +16,7 @@ interface NavLink {
 }
 
 function NavBar({ navlinks }: { navlinks: NavLink[] }) {
+    
     const location = useLocation();
 
     return (

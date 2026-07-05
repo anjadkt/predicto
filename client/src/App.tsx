@@ -8,6 +8,8 @@ import MainLayout from './layouts/MianLayout';
 import PredictionPage from './pages/Prediction';
 import LiveStats from './pages/LiveStats';
 import LeaderBoard from './pages/LeaderBoard';
+import Users from './pages/Users';
+import CreatePrediction from './pages/CreatePrediction';
 
 function App() {
 
@@ -38,9 +40,9 @@ function App() {
 
           <Route element={<MainLayout />}>
 
-            <Route path="/creator/dashboard" element={<></>} />
-            <Route path="/creator/predictions" element={<></>} />
-            <Route path="/creator/profile" element={<></>} />
+            <Route path="/users" element={<Users />} />
+            <Route path="/prediction" element={<CreatePrediction />} />
+            <Route path="/prediction/:id" element={<></>} />
 
           </Route>
 

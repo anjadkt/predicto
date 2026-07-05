@@ -1,4 +1,5 @@
 import { User } from "../models/user.model"
+import AppError from "../utils/AppError";
 
 
 export const getAll = async () => {
@@ -34,16 +35,29 @@ export const getAll = async () => {
     return users[0];
 }
 
-export const verifyUser = async (userId: string) => {
-
-    const user = await User.findById(userId).select("-password -refreshToken -createdAt -updatedAt -__v");
-
-    if (!user) {
-        throw new Error("User not found");
+export const updateUserDetails = async (
+    userId: string,
+    payload : {
+        score : number;
+        isVerified : boolean
     }
+) => {
 
-    user.isVerified = !user.isVerified;
-    await user.save();
+    const user = await User
+        .findByIdAndUpdate(
+            userId,
+            {
+                $set: {
+                    totalPoints: payload.score,
+                    isVerified : payload.isVerified
+                }
+            },
+            {
+                new: true
+            }
+        )
+        .select("name totalPoints avatar number");
+    if (!user) throw new AppError(404, "User not found!");
 
     return user;
 }

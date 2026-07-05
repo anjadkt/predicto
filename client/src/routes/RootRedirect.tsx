@@ -16,7 +16,7 @@ const RootRedirect = () => {
 
     switch (user.role) {
         case "creator":
-            return <Navigate to="/create-prediction" replace />;
+            return <Navigate to="/prediction" replace />;
 
         case "predictor":
             return <Navigate to="/" replace />;

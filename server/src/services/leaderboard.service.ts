@@ -16,27 +16,6 @@ export const leaderboard = async () => {
 
 }
 
-export const update = async (userId: string, score: number) => {
-
-    const user = await User
-        .findByIdAndUpdate(
-            userId,
-            {
-                $set: {
-                    totalPoints: score
-                }
-            },
-            {
-                new: true
-            }
-        )
-        .select("name totalPoints avatar number");
-    if (!user) throw new AppError(404, "User not found!");
-
-    return user;
-
-}
-
 export const updateLeaderboard = async (predictionId: string) => {
 
     const session = await mongoose.startSession();

@@ -14,10 +14,13 @@ export const getAllUsers = async (req: Request, res: Response, next: NextFunctio
     }
 }
 
-export const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
+export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
 
-        const user = await userService.verifyUser(req.params.userId as string);
+        const user = await userService.updateUserDetails(
+            req.params.userId as string,
+            req.body
+        );
 
         res.status(200).json(new ApiResponse(`User ${user.isVerified ? "verified" : "unverified"} successfully`, user));
 

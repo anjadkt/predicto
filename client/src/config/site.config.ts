@@ -26,11 +26,7 @@ export const MAIN_LAYOUT_DATA = {
             },
             {
                 icon: "create",
-                href: "/create-prediction"
-            },
-            {
-                icon: "leaderboard",
-                href: "/score-manage"
+                href: "/prediction"
             }
         ]
     }

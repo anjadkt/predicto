@@ -15,23 +15,6 @@ export const getLeaderboard = async (req: Request, res: Response, next: NextFunc
     }
 }
 
-export const updateScore = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-
-        const userId = req.params.id as string;
-        const score = Number(req.body.score as string);
-
-        const updatedUser = await leaderboardService.update(userId, score);
-
-        res.status(200).json(
-            new ApiResponse("Score updated successfully!", updatedUser)
-        )
-
-    } catch (error) {
-        next(error);
-    }
-}
-
 export const updateLeaderboard = async (req: Request, res: Response, next: NextFunction) => {
     try {
 
