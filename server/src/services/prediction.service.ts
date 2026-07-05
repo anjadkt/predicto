@@ -267,8 +267,6 @@ export const matchPredictions = async (matchId: string) => {
     const match = await Match.findById(matchId).select("-__v -createdAt -updatedAt").lean();
     if (!match) throw new AppError(404, "Match not found!");
 
-    const isStarted = ["IN_PLAY", "PAUSED", "LIVE"].includes(match.status);
-
     const userPredictions = await UserPrediction.aggregate([
         {
             $match: {

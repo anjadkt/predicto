@@ -13,6 +13,10 @@ export default function LiveMatch(
       return { text: "LIVE", isLive: true };
     }
 
+    if(["SCHEDULED" , "TIMED"].includes(s)){
+      return { text : "COMING", isLive : false}
+    }
+
     if (s === "FINISHED") {
       return { text: "FULL-TIME", isLive: false };
     }
@@ -42,7 +46,7 @@ export default function LiveMatch(
       {/* Horizontal Scroll Container */}
       <div className="flex overflow-x-auto gap-3 pb-2 snap-x hide-scrollbar px-4">
         {matches.map((v) => {
-          
+
           const score = getActualScores(v.score);
           const statusInfo = getMatchTimelineStatus(v.status);
           const isActive = activeMatchId === v._id;

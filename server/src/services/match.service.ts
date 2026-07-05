@@ -178,10 +178,15 @@ export const newMatches = async () => {
 
 export const matches = async (limit = 20) => {
 
+    const tomorrow = new Date();
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+    tomorrow.setUTCHours(0, 0, 0, 0);
+
     const matches = await Match.aggregate([
         {
             $match: {
-                status: { $in: ["IN_PLAY", "PAUSED", "LIVE", "FINISHED"] }
+                status: { $nin: ["POSTPONED" , "SUSPENDED" , "CANCELLED"] },
+                utcDate : { $lte : tomorrow }
             }
         },
         {
@@ -195,7 +200,13 @@ export const matches = async (limit = 20) => {
                                 },
                                 then: 1
                             },
-                            { case: { $eq: ["$status", "FINISHED"] }, then: 2 }
+                            {
+                                case : {
+                                    $in : ["$status", ["SCHEDULED" , "TIMED"]]
+                                },
+                                then: 2
+                            },
+                            { case: { $eq: ["$status", "FINISHED"] }, then: 3 }
                         ],
                         default: 99,
                     },
