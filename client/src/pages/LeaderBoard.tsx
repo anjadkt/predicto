@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getLeaderboardData } from '../services/leaderboard.service';
 import PageLoading from '../components/PageLoading';
 import type { LeaderBoardUser } from '../types/leaderboard.types';
+import UserAvatar from '../hooks/UseAvatar';
 
 export default function LeaderBoard() {
 
@@ -44,20 +45,25 @@ export default function LeaderBoard() {
           {/* Leaderboard List Container */}
           <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-3 sm:p-6 shadow-2xl border border-emerald-500/30 ring-1 ring-inset ring-white/10">
             {users.length > 0 ? (
-              <ul className="divide-y divide-white/10">
+              <ul className="divide-y divide-white/10 space-y-2">
                 {users.map((user, index) => (
                   <li 
                     key={user._id} 
-                    className="flex items-center justify-between p-4 sm:px-6 hover:bg-white/5 transition-all duration-300 rounded-2xl group"
+                    className={`flex items-center justify-between p-4 sm:px-6 transition-all duration-300 rounded-2xl group border ${
+                      index === 0 
+                        ? 'bg-yellow-400/10 border-yellow-400/40 shadow-[0_0_15px_rgba(250,204,21,0.15)] hover:bg-yellow-400/20' : 
+                      index === 1 
+                        ? 'bg-amber-600/10 border-amber-600/40 shadow-[0_0_15px_rgba(217,119,6,0.1)] hover:bg-amber-600/20' :  
+                        'bg-transparent border-transparent hover:bg-white/5'
+                    }`}
                   >
                     <div className="flex items-center gap-4 sm:gap-6">
                       
                       {/* Rank Indicator */}
                       <div className="w-8 text-center">
                         <span className={`text-xl font-display-sports font-bold ${
-                          index === 0 ? 'text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]' : 
-                          index === 1 ? 'text-slate-300 drop-shadow-[0_0_8px_rgba(203,213,225,0.4)]' : 
-                          index === 2 ? 'text-amber-600 drop-shadow-[0_0_8px_rgba(217,119,6,0.5)]' : 
+                          index === 0 ? 'text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]' :
+                          index === 1 ? 'text-amber-600 drop-shadow-[0_0_8px_rgba(217,119,6,0.5)]' : 
                           'text-slate-500'
                         }`}>
                           #{index + 1}
@@ -65,21 +71,19 @@ export default function LeaderBoard() {
                       </div>
 
                       {/* Avatar Section */}
-                      {user.avatar ? (
-                        <img 
-                          src={user.avatar} 
-                          alt={`${user.name}'s avatar`} 
-                          className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-emerald-500/50 p-0.5 group-hover:border-emerald-400 transition-colors"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-xl uppercase border border-emerald-500/30 backdrop-blur-sm group-hover:border-emerald-400 transition-colors">
-                          {user.name.charAt(0)}
-                        </div>
-                      )}
+                      <UserAvatar 
+                        className={`w-10 h-10 sm:w-8 sm:h-8 rounded-full object-cover border-2 p-0.5 transition-colors ${
+                          index === 0 ? 'border-yellow-400/70 group-hover:border-yellow-400' :
+                          index === 1 ? 'border-amber-600/70 group-hover:border-amber-600' :
+                          'border-emerald-500/50 group-hover:border-emerald-400'
+                        }`}
+                        src={user.avatar}   
+                        name={user.name}                  
+                      />
 
                       {/* Name & Subtext Section */}
                       <div className="flex flex-col">
-                        <span className="text-lg sm:text-xl font-semibold text-slate-200 capitalize tracking-wide">
+                        <span className="text-lg sm:text-sm font-semibold text-slate-200 capitalize tracking-wide">
                           {user.name}
                         </span>
                         <span className="text-xs text-slate-500 font-medium tracking-widest">
@@ -90,11 +94,26 @@ export default function LeaderBoard() {
 
                     {/* Score Section */}
                     <div className="text-right pl-4">
-                      <div className="inline-flex items-baseline gap-1.5 bg-cyan-950/40 border border-cyan-500/30 px-4 py-1.5 rounded-full shadow-inner">
-                        <span className="text-xl sm:text-2xl font-bold text-cyan-400">
+                      <div className={`inline-flex items-baseline gap-1.5 px-4 py-1.5 rounded-full shadow-inner border ${
+                        index === 0 ? 'bg-yellow-950/40 border-yellow-500/30' :
+                        index === 1 ? 'bg-slate-800/40 border-slate-500/30' :
+                        index === 2 ? 'bg-amber-950/40 border-amber-500/30' :
+                        'bg-cyan-950/40 border-cyan-500/30'
+                      }`}>
+                        <span className={`text-xl sm:text-2xl font-bold ${
+                          index === 0 ? 'text-yellow-400' :
+                          index === 1 ? 'text-slate-300' :
+                          index === 2 ? 'text-amber-500' :
+                          'text-cyan-400'
+                        }`}>
                           {user.totalPoints}
                         </span>
-                        <span className="text-xs font-semibold text-cyan-500/70 uppercase tracking-widest">
+                        <span className={`text-xs font-semibold uppercase tracking-widest ${
+                          index === 0 ? 'text-yellow-500/70' :
+                          index === 1 ? 'text-slate-400/70' :
+                          index === 2 ? 'text-amber-600/70' :
+                          'text-cyan-500/70'
+                        }`}>
                           pts
                         </span>
                       </div>
