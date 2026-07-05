@@ -11,8 +11,8 @@ router.get("/", getAllPrediction);
 router.get("/:id", authorize("creator"), getPredictionResults);
 router.get("/:id/user/:userId", authorize("creator"), getUserPrediction);
 router.post("/", authorize("creator"), createPrediction);
-router.post("/:id/predict", userPrediction);
-router.patch("/:id/predict", updatePrediction);
+router.post("/:id/predict", authorize("predictor"), userPrediction);
+router.patch("/:id/predict", authorize("predictor"), updatePrediction);
 router.get("/match/:matchId", getMatchPredictions); // need to test
 
 export default router;
