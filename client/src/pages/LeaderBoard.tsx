@@ -83,8 +83,8 @@ export default function LeaderBoard() {
 
                       {/* Name & Subtext Section */}
                       <div className="flex flex-col">
-                        <span className="text-lg sm:text-sm font-semibold text-slate-200 capitalize tracking-wide">
-                          {user.name}
+                        <span className="text-xs font-semibold text-slate-200 capitalize tracking-wide">
+                          {user.name.length > 10 ? user.name.slice(0,11) + "..." : user.name}
                         </span>
                         <span className="text-xs text-slate-500 font-medium tracking-widest">
                           {user.number.replace(/.(?=.{4})/g, '•')}
@@ -93,25 +93,22 @@ export default function LeaderBoard() {
                     </div>
 
                     {/* Score Section */}
-                    <div className="text-right pl-4">
-                      <div className={`inline-flex items-baseline gap-1.5 px-4 py-1.5 rounded-full shadow-inner border ${
+                    <div className="text-right pl-2">
+                      <div className={`inline-flex items-baseline gap-1.5 px-2 py-1 rounded-full shadow-inner border ${
                         index === 0 ? 'bg-yellow-950/40 border-yellow-500/30' :
-                        index === 1 ? 'bg-slate-800/40 border-slate-500/30' :
-                        index === 2 ? 'bg-amber-950/40 border-amber-500/30' :
+                        index === 1 ? 'bg-amber-950/40 border-amber-500/30' :
                         'bg-cyan-950/40 border-cyan-500/30'
                       }`}>
-                        <span className={`text-xl sm:text-2xl font-bold ${
+                        <span className={`text-sm font-bold ${
                           index === 0 ? 'text-yellow-400' :
-                          index === 1 ? 'text-slate-300' :
-                          index === 2 ? 'text-amber-500' :
+                          index === 1 ? 'text-amber-500' :
                           'text-cyan-400'
                         }`}>
                           {user.totalPoints}
                         </span>
                         <span className={`text-xs font-semibold uppercase tracking-widest ${
                           index === 0 ? 'text-yellow-500/70' :
-                          index === 1 ? 'text-slate-400/70' :
-                          index === 2 ? 'text-amber-600/70' :
+                          index === 1 ? 'text-amber-600/70' :
                           'text-cyan-500/70'
                         }`}>
                           pts
