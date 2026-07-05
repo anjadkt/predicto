@@ -6,6 +6,8 @@ import Register from "./pages/Register";
 import RootRedirect from "./routes/RootRedirect";
 import MainLayout from './layouts/MianLayout';
 import PredictionPage from './pages/Prediction';
+import LiveStats from './pages/LiveStats';
+import LeaderBoard from './pages/LeaderBoard';
 
 function App() {
 
@@ -25,8 +27,8 @@ function App() {
           <Route element={<MainLayout />}>
 
             <Route path="/" element={<PredictionPage />} />
-            <Route path="/creator/predictions" element={<></>} />
-            <Route path="/creator/profile" element={<></>} />
+            <Route path="/live" element={<LiveStats />} />
+            <Route path="/leaderboard" element={<LeaderBoard />} />
 
           </Route>
 

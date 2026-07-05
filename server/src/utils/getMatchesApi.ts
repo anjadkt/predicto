@@ -25,7 +25,21 @@ export const getMatchesFromApi = async (matchIds: any) => {
             "CANCELLED",
         ];
 
+        const MATCH_STATUSES = new Set([
+            "SCHEDULED",
+            "TIMED",
+            "IN_PLAY",
+            "PAUSED",
+            "FINISHED",
+            "POSTPONED",
+            "SUSPENDED",
+            "CANCELLED",
+            "LIVE",
+        ]);
+
         const existingMatch = matchIds.get(match.id);
+
+        if(!MATCH_STATUSES.has(match.status)) continue ; 
 
         const becameFinished =
             existingMatch?.status &&

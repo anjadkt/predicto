@@ -1,5 +1,6 @@
 import { Swords, CheckCircle2, XCircle, AlertCircle, Edit2 } from "lucide-react";
 import type { ModalPayload, UserMatchPrediction, UserPrediction } from "../types/prediction.types";
+import getActualScores from "../utils/getActualScores";
 
 export default function UserPredictionComp(
   { prediction, handleUpdate }: 
@@ -37,37 +38,11 @@ export default function UserPredictionComp(
 
 function MatchComp({ match }: { match: UserMatchPrediction }) {
   
-  const actualScores = (() => {
-    const { duration, fullTime, regularTime, extraTime } = match.matchId.score;
-
-    if (fullTime.home == null || fullTime.away == null) {
-      return { home: "-", away: "-" };
-    }
-
-    if (duration === "PENALTY_SHOOTOUT") {
-      if (
-        regularTime.home == null ||
-        regularTime.away == null ||
-        extraTime.home == null ||
-        extraTime.away == null
-      ) {
-        return { home: "-", away: "-" };
-      }
-      return {
-        home: regularTime.home + extraTime.home,
-        away: regularTime.away + extraTime.away,
-      };
-    }
-    return fullTime;
-  })();
+  const actualScores = getActualScores(match.matchId.score)
 
   const getMatchTimelineStatus = (status: string) => {
 
     const s = status.toUpperCase();
-
-    if (["SCHEDULED", "TIMED"].includes(s)) {
-      return { text: "Waiting", className: "bg-slate-100 text-slate-600 border-slate-200" };
-    }
 
     if (["IN_PLAY", "PAUSED", "LIVE"].includes(s)) {
       return { text: "Ongoing", className: "bg-red-50 text-red-600 border-red-200 animate-pulse" };

@@ -176,13 +176,12 @@ export const newMatches = async () => {
 
 }
 
-export const matches = async (limit: number) => {
+export const matches = async (limit = 20) => {
 
     const matches = await Match.aggregate([
         {
             $match: {
-                status: { $in: ["IN_PLAY", "PAUSED", "LIVE", "FINISHED"] },
-                isUsed: false
+                status: { $in: ["IN_PLAY", "PAUSED", "LIVE", "FINISHED"] }
             }
         },
         {
@@ -210,6 +209,9 @@ export const matches = async (limit: number) => {
             },
         },
         {
+            $limit: limit,
+        },
+        {
             $project: {
                 __v: 0,
                 statusPriority: 0,
@@ -218,10 +220,7 @@ export const matches = async (limit: number) => {
                 updatedAt: 0,
                 istDate: 0,
             },
-        },
-        {
-            $limit: limit,
-        },
+        }
     ]);
 
     return matches;

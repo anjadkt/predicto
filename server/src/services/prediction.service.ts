@@ -298,8 +298,7 @@ export const matchPredictions = async (matchId: string) => {
                     {
                         $project: {
                             name: 1,
-                            avatar: 1,
-                            totalPoints: 1
+                            avatar: 1
                         }
                     }
                 ],
@@ -316,7 +315,9 @@ export const matchPredictions = async (matchId: string) => {
                 predictions: {
                     $push: {
                         predictor: "$predictor",
-                        points: "$totalPoints",
+                        points: {
+                            $ifNull: ["$predictions.results.points", 0]
+                        },
                         prediction: "$predictions.predictedScores"
                     }
                 }
