@@ -105,7 +105,7 @@ function PredictionSection({
   users,
   status,
 }: {
-  count :number;
+  count: number;
   users: PredictorResult[];
   status: "WRONG" | "RIGHT" | "MAYBE";
 }) {
@@ -116,30 +116,34 @@ function PredictionSection({
     RIGHT: {
       title: "Correct Predictions",
       className: "text-lg font-black tracking-tight text-emerald-400",
+      fallback: "No correct predictions yet.",
     },
     WRONG: {
       title: "Wrong Predictions",
       className: "text-lg font-black tracking-tight text-red-400",
+      fallback: "No wrong predictions yet.",
     },
     MAYBE: {
-      title: "Predictions Have Chance",
+      title: "Potential Predictions",
       className: "text-lg font-black tracking-tight text-amber-400",
+      fallback: "No predictions currently have a chance.",
     },
   } as const;
 
-  const { title, className } = predictionStatus[status];
+  const { title, className, fallback } = predictionStatus[status];
 
   return (
-
     <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-xl shadow-black/10 sm:p-5">
       
       <div className="mb-4 flex items-start justify-between gap-4">
         <h2 className={className}>{title}</h2>
-        <div className={`rounded-full px-3 py-1 text-xs font-black ${
-          isPositive
-            ? "bg-emerald-400/10 text-emerald-300 ring-1 ring-emerald-400/30"
-            : "bg-red-400/10 text-red-300 ring-1 ring-red-400/30"
-        }`}>
+        <div
+          className={`rounded-full px-3 py-1 text-xs font-black ${
+            isPositive
+              ? "bg-emerald-400/10 text-emerald-300 ring-1 ring-emerald-400/30"
+              : "bg-red-400/10 text-red-300 ring-1 ring-red-400/30"
+          }`}
+        >
           {count}
         </div>
       </div>
@@ -152,7 +156,7 @@ function PredictionSection({
         </div>
       ) : (
         <div className="rounded-xl border border-dashed border-slate-700 bg-slate-950/50 p-6 text-center text-sm font-semibold text-slate-400">
-          No wrong predictions yet.
+          {fallback}
         </div>
       )}
     </section>

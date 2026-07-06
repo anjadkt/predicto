@@ -329,8 +329,22 @@ export const matchPredictions = async (matchId: string) => {
                 predictions: 1
             }
         }
-    ])
-    return userPredictions;
+    ]);
+
+    const statuses = match.status === "FINISHED" ? ["RIGHT", "WRONG"] : ["MAYBE", "RIGHT", "WRONG"] ;
+
+    const result = statuses.map((status) => {
+
+        return (
+            userPredictions.find((item) => item.status === status) ?? {
+                status,
+                count: 0,
+                predictions: [],
+            }
+        );
+    });
+
+    return result;
 }
 
 export const results = async (predictionId: string) => {
