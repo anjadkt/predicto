@@ -2,8 +2,8 @@ import { updateForecast } from "../services/match.service";
 import { api } from "./api";
 import { formatIsoDate } from "./formatDate";
 
-const MATCH_DATE_UPTO = 3 * 24 * 60 * 60 * 1000
-const MATCH_DATE_FROM = 1 * 24 * 60 * 60 * 1000;
+const MATCH_DATE_UPTO = 2 * 24 * 60 * 60 * 1000
+export const MATCH_DATE_FROM = 1 * 24 * 60 * 60 * 1000;
 
 export const getMatchesFromApi = async (matchIds: any) => {
 
@@ -39,7 +39,11 @@ export const getMatchesFromApi = async (matchIds: any) => {
 
         const existingMatch = matchIds.get(match.id);
 
-        if(!MATCH_STATUSES.has(match.status)) continue ; 
+        if(
+            !MATCH_STATUSES.has(match.status) ||
+            !match.homeTeam.name || !match.homeTeam.tla || !match.homeTeam.crest || !match.homeTeam.shortName ||
+            !match.awayTeam.name || !match.awayTeam.tla || !match.awayTeam.crest || !match.awayTeam.shortName
+        ) continue ; 
 
         const becameFinished =
             existingMatch?.status &&

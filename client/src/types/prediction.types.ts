@@ -110,3 +110,14 @@ export type ModalPayload = {
   predictionId : string;
 }
   
+
+export type CreateMatch = {
+  _id: string;
+  apiMatchId: number;
+  awayTeam: Team;
+  date: string;
+  homeTeam: Team;
+  status: string;
+  time: string;
+  utcDate: string;
+}

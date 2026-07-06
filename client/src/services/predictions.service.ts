@@ -35,3 +35,18 @@ export const updatePrediction = async (predictionId:string, payload:{
 
     return data.response ;
 }
+
+
+export const getNewMatches = async () => {
+    
+    const { data } = await api.get("/matches/new");
+
+    return data.response ;
+}
+
+export const addPrediction = async ( payload : { matchId : string , apiMatchId : number}[]) => {
+
+    const { data } = await api.post("/predictions",{matches : payload});
+
+    return data.response ;
+}

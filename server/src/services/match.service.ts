@@ -1,6 +1,6 @@
 import { Match } from "../models/match.model";
-import { formatDate, formatTime, utcToIst } from "../utils/formatDate";
-import { getMatchesFromApi } from "../utils/getMatchesApi";
+import { formatDate, formatIsoDate, formatTime, utcToIst } from "../utils/formatDate";
+import { getMatchesFromApi, MATCH_DATE_FROM } from "../utils/getMatchesApi";
 import AppError from "../utils/AppError";
 import mongoose from "mongoose";
 import { UserPrediction } from "../models/userPrediction.model";
@@ -10,8 +10,13 @@ import { Prediction } from "../models/prediction.model";
 
 export const sync = async () => {
 
+    const dateFrom = formatIsoDate(new Date(new Date().getTime() - MATCH_DATE_FROM));
+
     const matchesLive = await Match
-        .find({ status: { $nin: ["FINISHED", "POSTPONED", "SUSPENDED", "CANCELLED"] } })
+        .find({ 
+            status: { $nin: ["POSTPONED", "SUSPENDED", "CANCELLED"] } ,
+            utcDate : { $gte : dateFrom}
+        })
         .select("_id apiMatchId status score")
         .lean();
 
@@ -54,6 +59,8 @@ export const sync = async () => {
             }
         );
     }
+
+    matchesNew.length > 0 && console.log(`${matchesNew.length} matches synced✅`);
 }
 
 export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
