@@ -26,7 +26,7 @@ export default function LiveMatch(
   };
 
   return (
-    <div className="w-full bg-slate-900 py-3 mx-2 border border-slate-800/80 shadow-inner">
+    <div className="w-full bg-slate-900 py-3 border border-slate-800/80 shadow-inner">
       <style>{`
         @keyframes moving-underline {
           0% { transform: translateX(-100%); }

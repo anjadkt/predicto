@@ -6,6 +6,7 @@ import PageLoading from "../components/PageLoading";
 import type { MatchPredictionResults, PredictorResult } from "../types/match.types";
 import { Trophy } from "lucide-react";
 import UserAvatar from "../hooks/UseAvatar";
+import { useAuth } from "../hooks/UseAuth";
 
 function LiveStats () {
 
@@ -54,14 +55,14 @@ function LiveStats () {
   const totalParticipants = predictors.reduce((total, group) => total + group.count, 0);
 
   return(
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-screen bg-slate-950 text-white mb-8">
       <LiveMatch 
         setActiveMatchId={setActiveMatchId}
         activeMatchId={activeMatchId} 
         matches={matches} 
       />
 
-      <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full px-4 py-6 sm:px-6 lg:px-8">
 
         {matches.length === 0 ? (
           <EmptyState
@@ -164,14 +165,19 @@ function PredictionSection({
 }
 
 function PredictionUserCard({ user }: { user: PredictorResult }) {
+  const { user: authUser } = useAuth();
+  
+  const isUser = authUser?._id === user.predictor._id;
 
   return (
     <article 
       className={`
-        group relative flex items-center justify-between gap-2 rounded-xl p-2.5 pr-4 transition-all duration-200
-        ${user.points > 0 
-          ? "bg-slate-900/80 border border-emerald-900/30 hover:border-emerald-700/50" 
-          : "bg-slate-900/40 border border-slate-800/60 hover:bg-slate-800/60"
+        group relative flex items-center justify-between gap-2 rounded-xl p-2.5 pr-4 transition-all duration-300
+        ${isUser 
+          ? "bg-slate-800/90 border border-blue-500/50 ring-1 ring-blue-500/40 shadow-[0_0_15px_rgba(59,130,246,0.25)] z-10" 
+          : user.points > 0 
+            ? "bg-slate-900/80 border border-emerald-900/30 hover:border-emerald-700/50" 
+            : "bg-slate-900/40 border border-slate-800/60 hover:bg-slate-800/60"
         }
       `}
     >
@@ -181,21 +187,29 @@ function PredictionUserCard({ user }: { user: PredictorResult }) {
           <UserAvatar
             name={user.predictor.name}
             src={user.predictor.avatar}
-            className="h-10 w-10 rounded-full border border-slate-700 object-cover shadow-sm"
+            className={`h-10 w-10 rounded-full border object-cover shadow-sm ${
+              isUser ? "border-blue-400" : "border-slate-700"
+            }`}
           />
           {/* Small status dot indicator */}
-          <div className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-slate-900 ${user.points > 0 ? 'bg-emerald-500' : 'bg-slate-600'}`} />
+          <div className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-slate-900 ${
+            user.points > 0 ? 'bg-emerald-500' : 'bg-slate-600'
+          }`} />
         </div>
         
         <div className="flex flex-col min-w-0">
-          <h3 className="truncate text-sm font-bold text-slate-100 group-hover:text-white transition-colors">
-            {user.predictor.name}
+          <h3 className={`truncate text-sm font-bold transition-colors ${
+            isUser ? "text-blue-400 group-hover:text-blue-300" : "text-slate-100 group-hover:text-white"
+          }`}>
+            {isUser ? user.predictor.name + " (You)" : user.predictor.name}
           </h3>
         </div>
       </div>
 
       {/* Center: The Prediction */}
-      <div className="flex items-center justify-center bg-slate-950/80 px-3 py-1.5 rounded-lg border border-slate-800/80 shadow-inner">
+      <div className={`flex items-center justify-center px-3 py-1.5 rounded-lg border shadow-inner ${
+        isUser ? "bg-slate-900/80 border-blue-900/50" : "bg-slate-950/80 border-slate-800/80"
+      }`}>
         <span className="text-sm font-black tabular-nums text-white">{user.prediction.homeTeam}</span>
         <span className="text-xs font-bold text-slate-600 mx-1.5">-</span>
         <span className="text-sm font-black tabular-nums text-white">{user.prediction.awayTeam}</span>
