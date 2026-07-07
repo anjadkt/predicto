@@ -78,7 +78,7 @@ function Register() {
 
             await registerUser({ ...formData, avatar });
 
-            navigate("/login");
+            navigate("/root");
 
         } catch (error: any) {
 
