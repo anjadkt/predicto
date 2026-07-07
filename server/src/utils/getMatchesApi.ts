@@ -14,28 +14,28 @@ export const getMatchesFromApi = async (matchIds: any) => {
 
     const { data } = await api.get(url);
 
+    const TERMINAL_STATUSES = [
+        "FINISHED",
+        "POSTPONED",
+        "SUSPENDED",
+        "CANCELLED",
+    ];
+
+    const MATCH_STATUSES = new Set([
+        "SCHEDULED",
+        "TIMED",
+        "IN_PLAY",
+        "PAUSED",
+        "FINISHED",
+        "POSTPONED",
+        "SUSPENDED",
+        "CANCELLED",
+        "LIVE",
+    ]);
+
     const matchesNewData = [];
 
     for (const match of data.matches) {
-
-        const TERMINAL_STATUSES = [
-            "FINISHED",
-            "POSTPONED",
-            "SUSPENDED",
-            "CANCELLED",
-        ];
-
-        const MATCH_STATUSES = new Set([
-            "SCHEDULED",
-            "TIMED",
-            "IN_PLAY",
-            "PAUSED",
-            "FINISHED",
-            "POSTPONED",
-            "SUSPENDED",
-            "CANCELLED",
-            "LIVE",
-        ]);
 
         const existingMatch = matchIds.get(match.id);
 

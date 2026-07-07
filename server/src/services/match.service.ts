@@ -7,6 +7,7 @@ import { UserPrediction } from "../models/userPrediction.model";
 import { calculatePoints } from "../utils/calcPoints";
 import { calculateChance } from "../utils/calcChance";
 import { Prediction } from "../models/prediction.model";
+import { User } from "../models/user.model";
 
 export const sync = async () => {
 
@@ -34,16 +35,14 @@ export const sync = async () => {
 
     const matchesNew = await getMatchesFromApi(matchIds);
 
-    for (const match of matchesNew) {
-
-        await Match.updateOne(
-            { apiMatchId: match.id },
-            {
+    const operations = matchesNew.map( match => ({
+        updateOne: {
+            filter: { apiMatchId: match.id },
+            update: {
                 $set: {
                     status: match.status,
-                    score: match.score,
+                    score: match.score
                 },
-
                 $setOnInsert: {
                     apiMatchId: match.id,
                     homeTeam: match.homeTeam,
@@ -52,13 +51,13 @@ export const sync = async () => {
                     istDate: utcToIst(match.utcDate),
                     date: formatDate(match.utcDate),
                     time: formatTime(match.utcDate),
-                },
+                }
             },
-            {
-                upsert: true
-            }
-        );
-    }
+            upsert: true
+        }
+    }))
+
+    await Match.bulkWrite(operations);
 
     matchesNew.length > 0 && console.log(`${matchesNew.length} matches synced✅`);
 }
@@ -76,33 +75,14 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
             throw new AppError(404, "Match not found");
         }
 
-        if (type === "FINISHED") {
-
-            const prediction = await Prediction
-                .findById(isMatchExist.predictionId)
-                .populate("matches.matchId", "_id status")
-                .select("matches")
-                .session(session);
-            if (!prediction) {
-                throw new AppError(404, "Prediction not found!");
-            }
-
-            const isAllFinished = prediction.matches.every(
-                (v: any) => v.matchId._id.toString() === match.matchId.toString() ? true : v.matchId.status === "FINISHED"
-            );
-
-            if (isAllFinished) {
-                prediction.status = "COMPLETED";
-                await prediction.save({ session });
-            }
-
-        }
-
         const userPredictions = await UserPrediction.find({
-            predictionId: isMatchExist.predictionId
-        });
+            predictionId: isMatchExist.predictionId,
+            isEvaluated : false
+        }).session(session);
 
         const predictionUpdates = [];
+
+        const scoreUpdations = [];
 
         for (const p of userPredictions) {
 
@@ -117,6 +97,7 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
             let result;
 
             if (type === "LIVE") {
+
                 const chance = calculateChance(predictedScores, match.score);
 
                 if(chance)continue;
@@ -150,15 +131,58 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
                     update: {
                         $set: {
                             "predictions.$.results": result,
-                            totalPoints
+                            totalPoints,
+                            isEvaluated : type === "FINISHED"
                         },
                     },
                 },
             });
+
+            if(type === "FINISHED"){
+
+                scoreUpdations.push({
+                    updateOne: {
+                        filter: { _id: p.predictorId },
+                        update: {
+                            $inc: {
+                                totalPoints
+                            }
+                        }
+                    }
+                })
+            }
         }
 
         if (predictionUpdates.length) {
             await UserPrediction.bulkWrite(predictionUpdates, { session });
+        }
+
+        if(scoreUpdations.length){
+            await User.bulkWrite(scoreUpdations, { session })
+        }
+        
+        if (type === "FINISHED") {
+
+            const prediction = await Prediction
+                .findById(isMatchExist.predictionId)
+                .populate("matches.matchId", "_id status")
+                .select("matches")
+                .session(session);
+                
+            if (!prediction) {
+                throw new AppError(404, "Prediction not found!");
+            }
+
+            const isAllFinished = prediction.matches.every(
+                (v: any) => v.matchId._id.toString() === match.matchId.toString() ? true : v.matchId.status === "FINISHED"
+            );
+
+            if (isAllFinished) {
+                prediction.status = "COMPLETED";
+                prediction.isEvaluated = true ;
+                await prediction.save({ session });
+            }
+
         }
 
 
