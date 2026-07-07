@@ -14,9 +14,9 @@ export const sync = async () => {
     const dateFrom = formatIsoDate(new Date(new Date().getTime() - MATCH_DATE_FROM));
 
     const matchesLive = await Match
-        .find({ 
-            status: { $nin: ["POSTPONED", "SUSPENDED", "CANCELLED"] } ,
-            utcDate : { $gte : dateFrom}
+        .find({
+            status: { $nin: ["POSTPONED", "SUSPENDED", "CANCELLED"] },
+            utcDate: { $gte: dateFrom }
         })
         .select("_id apiMatchId status score")
         .lean();
@@ -35,7 +35,7 @@ export const sync = async () => {
 
     const matchesNew = await getMatchesFromApi(matchIds);
 
-    const operations = matchesNew.map( match => ({
+    const operations = matchesNew.map(match => ({
         updateOne: {
             filter: { apiMatchId: match.id },
             update: {
@@ -75,8 +75,33 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
             throw new AppError(404, "Match not found");
         }
 
+        let isAllFinished = false;
+
+        if (type === "FINISHED") {
+            const prediction = await Prediction
+                .findById(isMatchExist.predictionId)
+                .populate("matches.matchId", "_id status")
+                .select("matches")
+                .session(session);
+
+            if (!prediction) {
+                throw new AppError(404, "Prediction not found!");
+            }
+
+            isAllFinished = prediction.matches.every(
+                (v: any) => v.matchId._id.toString() === match.matchId.toString() ? true : v.matchId.status === "FINISHED"
+            );
+
+            if (isAllFinished) {
+                prediction.status = "COMPLETED";
+                prediction.isEvaluated = true;
+                await prediction.save({ session });
+            }
+        }
+
         const userPredictions = await UserPrediction.find({
-            predictionId: isMatchExist.predictionId
+            predictionId: isMatchExist.predictionId,
+            isEvaluated: false
         }).session(session);
 
         const predictionUpdates = [];
@@ -99,11 +124,11 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
 
                 const chance = calculateChance(predictedScores, match.score);
 
-                if(chance)continue;
+                if (chance) continue;
 
                 result = {
                     points: 0,
-                    status: chance ? "MAYBE" : "WRONG"
+                    status: "WRONG"
                 };
             } else {
                 const points = calculatePoints(predictedScores, match.score);
@@ -130,13 +155,14 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
                     update: {
                         $set: {
                             "predictions.$.results": result,
-                            totalPoints
+                            totalPoints,
+                            isEvaluated: isAllFinished
                         },
                     },
                 },
             });
 
-            if(type === "FINISHED"){
+            if (type === "FINISHED") {
 
                 scoreUpdations.push({
                     updateOne: {
@@ -155,34 +181,9 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
             await UserPrediction.bulkWrite(predictionUpdates, { session });
         }
 
-        if(scoreUpdations.length){
+        if (scoreUpdations.length) {
             await User.bulkWrite(scoreUpdations, { session })
         }
-        
-        if (type === "FINISHED") {
-
-            const prediction = await Prediction
-                .findById(isMatchExist.predictionId)
-                .populate("matches.matchId", "_id status")
-                .select("matches")
-                .session(session);
-                
-            if (!prediction) {
-                throw new AppError(404, "Prediction not found!");
-            }
-
-            const isAllFinished = prediction.matches.every(
-                (v: any) => v.matchId._id.toString() === match.matchId.toString() ? true : v.matchId.status === "FINISHED"
-            );
-
-            if (isAllFinished) {
-                prediction.status = "COMPLETED";
-                prediction.isEvaluated = true ;
-                await prediction.save({ session });
-            }
-
-        }
-
 
         await session.commitTransaction();
     } catch (err) {
@@ -214,8 +215,8 @@ export const matches = async (limit = 20) => {
     const matches = await Match.aggregate([
         {
             $match: {
-                status: { $nin: ["POSTPONED" , "SUSPENDED" , "CANCELLED"] },
-                utcDate : { $lte : tomorrow }
+                status: { $nin: ["POSTPONED", "SUSPENDED", "CANCELLED"] },
+                utcDate: { $lte: tomorrow }
             }
         },
         {
@@ -230,8 +231,8 @@ export const matches = async (limit = 20) => {
                                 then: 1
                             },
                             {
-                                case : {
-                                    $in : ["$status", ["SCHEDULED" , "TIMED"]]
+                                case: {
+                                    $in: ["$status", ["SCHEDULED", "TIMED"]]
                                 },
                                 then: 2
                             },
