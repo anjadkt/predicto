@@ -6,16 +6,21 @@ import jwt from 'jsonwebtoken'
 import { env } from "../config/env";
 import { createToken } from "../utils/createToken";
 
-export const register = async (payload: RegisterPayload) => {
+export const register = async (payload: RegisterPayload,ip:string) => {
 
     const { name, number, password, avatar } = payload;
 
     if (!name || !password || !number) throw new AppError(400, "All fields are required");
 
-    if (password.length < 6 || number.length < 10) throw new AppError(400, "Invalid password or number");
+    if (password.length < 6 || number.length !== 10) throw new AppError(400, "Invalid password or number");
+
+    if(!ip)throw new AppError(403,"Register not allowed!");
 
     const userExists = await User.findOne({ number }).lean();
     if (userExists) throw new AppError(409, "User already exists");
+
+    const ipExist = await User.findOne({ ipAddress : ip }).lean();
+    if(ipExist) throw new AppError(409, "User registered once!");
 
     const hashedPass = await bcrypt.hash(password, Number(env.SALT))
 
@@ -23,16 +28,35 @@ export const register = async (payload: RegisterPayload) => {
         name,
         number,
         password: hashedPass,
-        avatar
-    })
+        avatar,
+        ipAddress : ip
+    });
 
-    return {
-        name: user.name,
+    const accessToken = createToken({
+        _id: user._id,
         number: user.number,
         role: user.role,
-        isVerified: user.isVerified,
-        avatar: user.avatar
-    };
+        isVerified : true
+    }, env.JWT_ACCESS_SECRET, env.ACCESS_TOKEN_EXPIRES_IN);
+
+    const refreshToken = createToken({
+        _id: user._id
+    }, env.JWT_REFRESH_SECRET, env.REFRESH_TOKEN_EXPIRES_IN);
+
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    return {
+        user: {
+            name: user.name,
+            number: user.number,
+            role: user.role,
+            isVerified: user.isVerified,
+            avatar: user.avatar
+        },
+        accessToken,
+        refreshToken
+    }
 
 
 }

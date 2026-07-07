@@ -34,7 +34,11 @@ const refreshOptions:CookieOptions = env.NODE_ENV === "production" ? {
 export const registerController = async (req: Request, res: Response, next: NextFunction) => {
     try {
 
-        const user = await authServices.register(req.body);
+        const { user, accessToken, refreshToken } = await authServices.register(req.body,req.ip || "");
+
+        res.cookie("access_token", accessToken, accessOptions);
+
+        res.cookie("refresh_token", refreshToken, refreshOptions);
 
         res.status(201).json(new ApiResponse("User registered successfully", user));
 

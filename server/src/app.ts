@@ -3,17 +3,21 @@ import express from 'express'
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
-import serverRoutes from './routes.js'
-import globelErrorHandler from './middlewares/error.middleware.js';
+import serverRoutes from './routes'
+import globelErrorHandler from './middlewares/error.middleware';
+import globalRateLimit from './middlewares/limit.middleware'
 
 
 import type { Request, Response } from 'express';
-import { env } from './config/env.js';
+import { env } from './config/env';
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 app.use(helmet());
 app.use(morgan("dev"));
+app.use(globalRateLimit(10,100));
 
 app.use(cors({
   origin: env.CLIENT_URL,
