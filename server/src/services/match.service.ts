@@ -76,8 +76,7 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
         }
 
         const userPredictions = await UserPrediction.find({
-            predictionId: isMatchExist.predictionId,
-            isEvaluated : false
+            predictionId: isMatchExist.predictionId
         }).session(session);
 
         const predictionUpdates = [];
@@ -131,8 +130,7 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
                     update: {
                         $set: {
                             "predictions.$.results": result,
-                            totalPoints,
-                            isEvaluated : type === "FINISHED"
+                            totalPoints
                         },
                     },
                 },
@@ -145,7 +143,7 @@ export const updateForecast = async (match: any, type: "FINISHED" | "LIVE") => {
                         filter: { _id: p.predictorId },
                         update: {
                             $inc: {
-                                totalPoints
+                                totalPoints: result?.points || 0
                             }
                         }
                     }
