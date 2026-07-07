@@ -29,6 +29,7 @@ export const register = async (payload: RegisterPayload,ip:string) => {
         number,
         password: hashedPass,
         avatar,
+        isVerified : true,
         ipAddress : ip
     });
 
