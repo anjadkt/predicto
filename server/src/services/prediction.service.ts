@@ -169,8 +169,8 @@ export const predict = async (predictorId: string, predictionId: string, predict
     const isValid = predictions.every((prediction) => {
         const scores = prediction.predictedScores;
         return (
-            scores.homeTeam >= 0 &&
-            scores.awayTeam >= 0
+            scores.homeTeam >= 0 && scores.homeTeam <= 10 &&
+            scores.awayTeam >= 0 && scores.awayTeam <= 10
         )
     });
     if (!isValid) throw new AppError(400, "Invalid prediction data!");
@@ -222,8 +222,8 @@ export const update = async (predictorId: string, predictionId: string, predicti
     const isValid = predictions.every((prediction) => {
         const scores = prediction.predictedScores;
         return (
-            scores.homeTeam >= 0 &&
-            scores.awayTeam >= 0
+            scores.homeTeam >= 0 && scores.homeTeam <= 10 &&
+            scores.awayTeam >= 0 && scores.awayTeam <= 10
         )
     });
     if (!isValid) throw new AppError(400, "Invalid prediction data!");

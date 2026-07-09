@@ -30,6 +30,8 @@ export default function PredictModal({
     
     if (!/^\d*$/.test(value)) return;
 
+    if(Number(value) > 10)return ;
+
     setMatchPredictions((prev) =>
       prev.map((m) => {
         if (m.matchId === matchId) {
