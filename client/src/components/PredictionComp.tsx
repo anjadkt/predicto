@@ -15,7 +15,7 @@ export default function PredictionComp(
   const isCompleted = statusUpper === 'COMPLETED';
 
   return (
-    <div className={`bg-white min-w-[270px] min-h-[200px] rounded-2xl  p-3 border border-gray-100 flex flex-col gap-3 w-full transition-all 
+    <div className={`bg-white min-w-[270px] rounded-2xl  p-3 border border-gray-100 flex flex-col gap-3 w-full transition-all 
       ${isCompleted 
         ? "opacity-60 shadow-none pointer-events-none" 
         : "shadow-sm hover:shadow-md"

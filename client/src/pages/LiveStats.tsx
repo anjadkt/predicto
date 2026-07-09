@@ -55,7 +55,7 @@ function LiveStats () {
   const totalParticipants = predictors.reduce((total, group) => total + group.count, 0);
 
   return(
-    <div className="min-h-screen bg-slate-950 text-white mb-8">
+    <div className="min-h-screen bg-slate-950 text-white">
       <LiveMatch 
         setActiveMatchId={setActiveMatchId}
         activeMatchId={activeMatchId} 
@@ -82,7 +82,7 @@ function LiveStats () {
             message="No user has participated in this match prediction."
           />
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-6 mb-[80px]">
 
             {
               predictors.map((section) =>(

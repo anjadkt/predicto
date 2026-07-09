@@ -103,7 +103,7 @@ function PredictionPage() {
                         </div>
 
                         <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-emerald-500/30 ring-1 ring-inset ring-white/10">
-                            <div className="overflow-auto flex gap-5">
+                            <div className="overflow-auto flex gap-5 items-start">
                                 {predictions.map((prediction) => (
                                     <PredictionComp 
                                         handleCreate={handleCreate} 
