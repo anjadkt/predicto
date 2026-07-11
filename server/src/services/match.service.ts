@@ -208,15 +208,11 @@ export const newMatches = async () => {
 
 export const matches = async (limit = 20) => {
 
-    const tomorrow = new Date();
-    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-    tomorrow.setUTCHours(0, 0, 0, 0);
-
     const matches = await Match.aggregate([
         {
             $match: {
                 status: { $nin: ["POSTPONED", "SUSPENDED", "CANCELLED"] },
-                utcDate: { $lte: tomorrow }
+                isUsed : true
             }
         },
         {
