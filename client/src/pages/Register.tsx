@@ -4,6 +4,7 @@ import { validateField } from '../utils/validateFields';
 import { registerUser } from '../services/auth.service';
 import { uploadToCloud } from '../utils/uploadToCloudnary';
 import ButtonLoading from '../components/ButtonLoading';
+import { useAuth } from '../hooks/UseAuth';
 
 function Register() {
 
@@ -20,6 +21,8 @@ function Register() {
         number: '',
         password: ''
     });
+
+    const { refreshUser } = useAuth()
 
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -77,6 +80,8 @@ function Register() {
             const avatar = await uploadToCloud(file!);
 
             await registerUser({ ...formData, avatar });
+
+            await refreshUser();
 
             navigate("/root");
 
