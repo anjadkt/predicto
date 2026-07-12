@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken'
 import { env } from "../config/env";
 import { createToken } from "../utils/createToken";
 
-export const register = async (payload: RegisterPayload,ip:string) => {
+export const register = async (payload: RegisterPayload) => {
 
     const { name, number, password, avatar } = payload;
 
@@ -14,13 +14,8 @@ export const register = async (payload: RegisterPayload,ip:string) => {
 
     if (password.length < 6 || number.length !== 10) throw new AppError(400, "Invalid password or number");
 
-    if(!ip)throw new AppError(403,"Register not allowed!");
-
     const userExists = await User.findOne({ number }).lean();
     if (userExists) throw new AppError(409, "User already exists");
-
-    const ipExist = await User.findOne({ ipAddress : ip }).lean();
-    if(ipExist) throw new AppError(409, "User registered once!");
 
     const hashedPass = await bcrypt.hash(password, Number(env.SALT))
 
@@ -29,8 +24,7 @@ export const register = async (payload: RegisterPayload,ip:string) => {
         number,
         password: hashedPass,
         avatar,
-        isVerified : true,
-        ipAddress : ip
+        isVerified : true
     });
 
     const accessToken = createToken({

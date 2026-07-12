@@ -8,8 +8,7 @@ const userSchema = new Schema({
     isVerified: { type: Boolean, default: false },
     role: { type: String, enum: ["predictor", "creator"], default: "predictor" },
     totalPoints: { type: Number, default: 0 },
-    refreshToken: { type: String },
-    ipAddress: String
+    refreshToken: { type: String }
 
 }, { timestamps: true });
 

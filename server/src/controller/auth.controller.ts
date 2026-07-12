@@ -34,7 +34,7 @@ const refreshOptions:CookieOptions = env.NODE_ENV === "production" ? {
 export const registerController = async (req: Request, res: Response, next: NextFunction) => {
     try {
 
-        const { user, accessToken, refreshToken } = await authServices.register(req.body,req.ip || "");
+        const { user, accessToken, refreshToken } = await authServices.register(req.body);
 
         res.cookie("access_token", accessToken, accessOptions);
 
